@@ -1,15 +1,21 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const taskController = require('../controllers/taskController');
 const upload = require('../middlewares/upload');
-const { authenticateToken } = require('../middlewares/auth');
+const { JWT_SECRET } = require('../middlewares/auth');
 
-// Optional auth middleware: nếu có token thì gán req.user, nếu không thì vẫn cho qua (tương thích app cũ)
+// Optional auth middleware: nếu có token hợp lệ thì gán req.user, nếu token lỗi/hết hạn thì vẫn cho qua (không block)
 const optionalAuth = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   if (token) {
-    authenticateToken(req, res, next);
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+      if (!err && user) {
+        req.user = user;
+      }
+      next();
+    });
   } else {
     next();
   }

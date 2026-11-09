@@ -1528,10 +1528,16 @@ async function loadTasks() {
     const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
     const res = await fetch(url, { headers });
     const json = await res.json();
-    allTasks = json.data || [];
+    if (!res.ok) {
+      throw new Error(json.error || `HTTP ${res.status}`);
+    }
+    allTasks = Array.isArray(json) ? json : (json.data || []);
     renderKanban();
     updateStats();
-  } catch (err) { toast('Không thể tải danh sách công việc', 'error'); }
+  } catch (err) {
+    console.error('Lỗi khi tải task:', err);
+    toast(err.message || 'Không thể tải danh sách công việc', 'error');
+  }
 }
 
 function getFilteredTasks() {
@@ -1559,28 +1565,51 @@ function renderKanban() {
   const tasks = getFilteredTasks();
   const counts = { TODO: 0, IN_PROGRESS: 0, IN_REVIEW: 0, DONE: 0 };
 
+  // Xóa rỗng nội dung cũ của 4 cột
   statuses.forEach(s => {
-    document.getElementById(`col-${s}`).innerHTML = '';
-    document.getElementById(`empty-${s}`).style.display = 'none';
+    const col = document.getElementById(`col-${s}`);
+    if (col) col.innerHTML = '';
   });
 
+  // Đổ từng task vào cột tương ứng
   tasks.forEach(task => {
     const status = task.status || (task.completed ? 'DONE' : 'TODO');
-    if (!counts[status] !== undefined) counts[status] = (counts[status] || 0) + 1;
-    else counts[status] = 1;
+    counts[status] = (counts[status] || 0) + 1;
     if (statuses.includes(status)) {
-      const card = createTaskCard(task, status);
-      document.getElementById(`col-${status}`).appendChild(card);
+      const col = document.getElementById(`col-${status}`);
+      if (col) {
+        const card = createTaskCard(task, status);
+        col.appendChild(card);
+      }
     }
   });
 
   const total = tasks.length;
+  const emptyIcons = { TODO: '📋', IN_PROGRESS: '⚙️', IN_REVIEW: '🔍', DONE: '✅' };
+  const emptyTexts = {
+    TODO: 'Chưa có công việc',
+    IN_PROGRESS: 'Không có task đang chạy',
+    IN_REVIEW: 'Không có task chờ review',
+    DONE: 'Chưa hoàn tất công việc nào'
+  };
+
+  // Cập nhật số đếm và render empty state nếu cột rỗng
   statuses.forEach(s => {
     const cnt = counts[s] || 0;
-    document.getElementById(`cnt-${s}`).textContent = cnt;
-    document.getElementById(`fill-${s}`).style.width = total ? `${(cnt / total) * 100}%` : '0%';
-    if (cnt === 0) {
-      document.getElementById(`empty-${s}`).style.display = 'flex';
+    const cntEl = document.getElementById(`cnt-${s}`);
+    const fillEl = document.getElementById(`fill-${s}`);
+    const col = document.getElementById(`col-${s}`);
+
+    if (cntEl) cntEl.textContent = cnt;
+    if (fillEl) fillEl.style.width = total ? `${(cnt / total) * 100}%` : '0%';
+
+    if (cnt === 0 && col) {
+      col.innerHTML = `
+        <div class="col-empty">
+          <div class="col-empty-icon">${emptyIcons[s]}</div>
+          <div class="col-empty-text">${emptyTexts[s]}</div>
+        </div>
+      `;
     }
   });
 }
@@ -1594,10 +1623,19 @@ function createTaskCard(task, status) {
     ? `<span class="due-tag ${isOverdue ? 'overdue' : ''}">📅 ${task.dueDate}</span>`
     : '';
 
-  const assigneeHtml = task.assignee
+  let assigneeName = '';
+  if (task.assignee) {
+    if (typeof task.assignee === 'object') {
+      assigneeName = task.assignee.name || task.assignee.email || '';
+    } else {
+      assigneeName = String(task.assignee);
+    }
+  }
+
+  const assigneeHtml = assigneeName
     ? `<div class="task-assignee">
-        <div class="avatar-xs">${(task.assignee.name || 'U').charAt(0).toUpperCase()}</div>
-        <span>${escHtml(task.assignee.name || task.assignee.email)}</span>
+        <div class="avatar-xs">${assigneeName.charAt(0).toUpperCase()}</div>
+        <span>${escHtml(assigneeName)}</span>
       </div>`
     : `<div class="task-assignee" style="color:var(--text-muted)">Chưa phân công</div>`;
 
