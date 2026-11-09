@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # Web API & Background Queue Workers
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vku-cloud-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - MONGO_URI=${MONGO_URI}
+      - REDIS_URL=redis://redis:6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET:-vku_cloud_computing_super_secret_key_2026}
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - app-uploads:/app/public/uploads
+      - app-reports:/app/public/reports
+    networks:
+      - cloud-network
+
+  # In-Memory Cache & Message Broker (Redis)
+  redis:
+    image: redis:7-alpine
+    container_name: vku-cloud-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cloud-network
+
+networks:
+  cloud-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  app-uploads:
+  app-reports:

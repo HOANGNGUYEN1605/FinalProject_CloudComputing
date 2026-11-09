@@ -1,0 +1,38 @@
+name: Cloud Platform CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  test_and_build:
+    name: Kiểm thử tự động & Build Container
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Cài đặt Node.js môi trường Cloud
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Cài đặt Dependencies
+        run: npm ci
+
+      - name: Kiểm tra tính toàn vẹn cú pháp (Syntax Validation)
+        run: node -e "require('./server.js'); console.log('Syntax & Boot Check: PASSED');"
+
+      - name: Thiết lập Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build thử nghiệm Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: vku-cloud-app:latest

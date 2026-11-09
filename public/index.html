@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cloud Collaboration Platform - VKU Final Project</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --todo-border: #94a3b8;
+      --progress-border: #3b82f6;
+      --review-border: #f59e0b;
+      --done-border: #10b981;
+    }
+
+    * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 60px; }
+
+    /* Navbar */
+    .navbar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; color: #1e293b; }
+    .nav-actions { display: flex; align-items: center; gap: 10px; }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-cloud { background: #dbeafe; color: #1e40af; }
+    .badge-status { background: #dcfce7; color: #15803d; }
+
+    /* Container */
+    .container { max-width: 1380px; margin: 24px auto; padding: 0 20px; }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    }
+    .stat-card h4 { margin: 0; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-card p { margin: 6px 0 0; font-size: 26px; font-weight: 700; color: var(--text); }
+    .stat-icon { font-size: 28px; opacity: 0.8; }
+
+    /* Action bar */
+    .toolbar {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .toolbar-left, .toolbar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+    /* Buttons */
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-outline { background: #fff; border-color: var(--border); color: #334155; }
+    .btn-outline:hover { background: #f1f5f9; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-danger { background: #fee2e2; color: var(--danger); border-color: #fecaca; }
+    .btn-danger:hover { background: #fca5a5; }
+
+    /* Kanban Board Layout */
+    .kanban-board {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 1024px) {
+      .kanban-board { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .kanban-board { grid-template-columns: 1fr; }
+    }
+
+    .kanban-column {
+      background: #f1f5f9;
+      border-radius: 14px;
+      padding: 16px;
+      min-height: 520px;
+      border: 1px solid #e2e8f0;
+    }
+    .column-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid;
+    }
+    .col-todo { border-bottom-color: var(--todo-border); }
+    .col-progress { border-bottom-color: var(--progress-border); }
+    .col-review { border-bottom-color: var(--review-border); }
+    .col-done { border-bottom-color: var(--done-border); }
+
+    .column-header h3 { margin: 0; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .col-count { background: #e2e8f0; color: #475569; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+
+    /* Task Card */
+    .task-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .task-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
+    .task-card-title { font-weight: 700; font-size: 14px; margin-bottom: 6px; color: #1e293b; }
+    .task-card-desc { font-size: 13px; color: var(--muted); margin-bottom: 10px; line-height: 1.4; }
+    
+    .prio-badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+    .prio-Urgent { background: #fee2e2; color: #991b1b; }
+    .prio-High { background: #ffedd5; color: #c2410c; }
+    .prio-Medium { background: #fef9c3; color: #854d0e; }
+    .prio-Low { background: #e0f2fe; color: #075985; }
+
+    .task-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); margin-top: 10px; }
+    .task-attachments { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 12px; }
+    .attachment-item { display: inline-flex; align-items: center; gap: 4px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; margin-top: 4px; text-decoration: none; color: var(--primary); }
+    
+    .card-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid #f1f5f9; }
+    .status-select { font-size: 12px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
+
+    /* Modals */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+    .modal {
+      background: #ffffff;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .modal-header h3 { margin: 0; font-size: 18px; }
+    .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
+    
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #334155; }
+    .form-control { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* Health Modal Box */
+    .health-metric { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; font-size: 13px; }
+    .health-metric b { color: #1e293b; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="brand">
+      <span>☁️</span>
+      <span>Cloud Collaboration Platform</span>
+      <span class="badge badge-cloud" id="cloudEnvBadge">Render / Atlas</span>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-outline" onclick="openHealthModal()">🔍 Giám Sát Cloud</button>
+      <button class="btn btn-success" onclick="exportExcelReport()">📊 Xuất Báo Cáo Excel</button>
+      <div id="userSection">
+        <button class="btn btn-primary" onclick="openAuthModal()">🔑 Đăng Nhập / Đăng Ký</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Stats Row -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div>
+          <h4>Tổng Công Việc</h4>
+          <p id="totalTasksCount">0</p>
+        </div>
+        <div class="stat-icon">📋</div>
+      </div>
+      <div class="stat-card">
+        <div>
+          <h4>Đang Xử Lý</h4>
+          <p id="inProgressTasksCount">0</p>
+        </div>
+        <div class="stat-icon">⚡</div>
+      </div>
+      <div class="stat-card">
+        <div>
+          <h4>Đã Hoàn Thành</h4>
+          <p id="doneTasksCount">0</p>
+        </div>
+        <div class="stat-icon">✅</div>
+      </div>
+      <div class="stat-card">
+        <div>
+          <h4>Tiến Độ Chung</h4>
+          <p id="progressPercentage">0%</p>
+        </div>
+        <div class="stat-icon">📈</div>
+      </div>
+    </div>
+
+    <!-- Action Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <label style="font-size: 13px; font-weight: 600; color: var(--muted);">Dự án:</label>
+        <select id="projectSelect" class="form-control" style="width: auto; min-width: 180px;" onchange="loadTasks()">
+          <option value="">-- Tất cả công việc --</option>
+        </select>
+        <button class="btn btn-outline" onclick="openProjectModal()">+ Tạo Dự Án Mới</button>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn btn-primary" onclick="openTaskModal()">+ Thêm Công Việc Mới</button>
+      </div>
+    </div>
+
+    <!-- Kanban Board -->
+    <div class="kanban-board">
+      <!-- Cột 1: Cần làm (TODO) -->
+      <div class="kanban-column">
+        <div class="column-header col-todo">
+          <h3>📋 Cần làm <span class="col-count" id="count-TODO">0</span></h3>
+        </div>
+        <div id="col-list-TODO"></div>
+      </div>
+
+      <!-- Cột 2: Đang thực hiện (IN_PROGRESS) -->
+      <div class="kanban-column">
+        <div class="column-header col-progress">
+          <h3>⚙️ Đang làm <span class="col-count" id="count-IN_PROGRESS">0</span></h3>
+        </div>
+        <div id="col-list-IN_PROGRESS"></div>
+      </div>
+
+      <!-- Cột 3: Chờ kiểm tra (IN_REVIEW) -->
+      <div class="kanban-column">
+        <div class="column-header col-review">
+          <h3>🔍 Chờ duyệt <span class="col-count" id="count-IN_REVIEW">0</span></h3>
+        </div>
+        <div id="col-list-IN_REVIEW"></div>
+      </div>
+
+      <!-- Cột 4: Đã hoàn tất (DONE) -->
+      <div class="kanban-column">
+        <div class="column-header col-done">
+          <h3>✅ Hoàn tất <span class="col-count" id="count-DONE">0</span></h3>
+        </div>
+        <div id="col-list-DONE"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Thêm Task mới -->
+  <div class="modal-backdrop" id="taskModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>+ Tạo Công Việc Mới</h3>
+        <button class="close-btn" onclick="closeModal('taskModal')">&times;</button>
+      </div>
+      <form id="taskForm" onsubmit="handleCreateTask(event)">
+        <div class="form-group">
+          <label>Tiêu đề công việc *</label>
+          <input type="text" id="taskTitle" class="form-control" placeholder="Ví dụ: Thiết kế cơ sở dữ liệu trên Cloud..." required />
+        </div>
+        <div class="form-group">
+          <label>Mô tả chi tiết</label>
+          <textarea id="taskDesc" class="form-control" rows="3" placeholder="Chi tiết yêu cầu, phạm vi công việc..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Độ ưu tiên</label>
+            <select id="taskPriority" class="form-control">
+              <option value="Low">Thấp (Low)</option>
+              <option value="Medium" selected>Trung bình (Medium)</option>
+              <option value="High">Cao (High)</option>
+              <option value="Urgent">Khẩn cấp (Urgent)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Hạn chót (Due date)</label>
+            <input type="date" id="taskDueDate" class="form-control" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Thuộc Dự Án</label>
+          <select id="taskProject" class="form-control">
+            <option value="">(Không gán dự án)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Lưu Công Việc</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Tạo Dự Án Mới -->
+  <div class="modal-backdrop" id="projectModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>📁 Tạo Không Gian Dự Án Mới</h3>
+        <button class="close-btn" onclick="closeModal('projectModal')">&times;</button>
+      </div>
+      <form id="projectForm" onsubmit="handleCreateProject(event)">
+        <div class="form-group">
+          <label>Tên dự án *</label>
+          <input type="text" id="projName" class="form-control" placeholder="Ví dụ: Đồ án Điện toán Đám mây VKU..." required />
+        </div>
+        <div class="form-group">
+          <label>Mục tiêu / Mô tả dự án</label>
+          <textarea id="projDesc" class="form-control" rows="2" placeholder="Mục tiêu của dự án..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Tạo Dự Án</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Đăng Nhập / Đăng Ký -->
+  <div class="modal-backdrop" id="authModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="authTitle">🔑 Đăng Nhập Hệ Thống</h3>
+        <button class="close-btn" onclick="closeModal('authModal')">&times;</button>
+      </div>
+      <form id="authForm" onsubmit="handleAuthSubmit(event)">
+        <div class="form-group" id="nameGroup" style="display: none;">
+          <label>Họ và Tên *</label>
+          <input type="text" id="authName" class="form-control" placeholder="Nguyễn Văn A" />
+        </div>
+        <div class="form-group">
+          <label>Địa chỉ Email *</label>
+          <input type="email" id="authEmail" class="form-control" placeholder="vku-student@vku.udn.vn" required />
+        </div>
+        <div class="form-group">
+          <label>Mật khẩu *</label>
+          <input type="password" id="authPassword" class="form-control" placeholder="******" required />
+        </div>
+        <button type="submit" class="btn btn-primary" id="authBtn" style="width: 100%;">Đăng Nhập</button>
+        <p style="text-align: center; margin-top: 14px; font-size: 13px; color: var(--muted);">
+          <span id="authToggleText">Chưa có tài khoản?</span>
+          <a href="javascript:void(0)" onclick="toggleAuthMode()" id="authToggleLink" style="color: var(--primary); font-weight: 600;">Đăng ký ngay</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Upload Tệp Đính Kèm -->
+  <div class="modal-backdrop" id="uploadModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>📎 Đính Kèm Tệp Tin Lên Đám Mây</h3>
+        <button class="close-btn" onclick="closeModal('uploadModal')">&times;</button>
+      </div>
+      <form id="uploadForm" onsubmit="handleUploadSubmit(event)">
+        <input type="hidden" id="uploadTaskId" />
+        <div class="form-group">
+          <label>Chọn tệp đính kèm (Hình ảnh, Tài liệu PDF/Word, tối đa 10MB)</label>
+          <input type="file" id="fileInput" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Tải Lên Lưu Trữ Cloud</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Giám Sát Cloud (Observability) -->
+  <div class="modal-backdrop" id="healthModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>☁️ Thông Số Vận Hành Hệ Thống Đám Mây</h3>
+        <button class="close-btn" onclick="closeModal('healthModal')">&times;</button>
+      </div>
+      <div id="healthContent">
+        <p>Đang tải thông số thời gian thực...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let authToken = localStorage.getItem('vku_auth_token') || null;
+    let authMode = 'login'; // 'login' or 'register'
+    let currentTasks = [];
+    let projectsList = [];
+
+    // Khởi chạy ứng dụng
+    document.addEventListener('DOMContentLoaded', async () => {
+      checkLoginStatus();
+      await fetchProjects();
+      await loadTasks();
+      fetchHealthMetrics();
+    });
+
+    // Quản lý Modal
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function openTaskModal() { openModal('taskModal'); }
+    function openProjectModal() {
+      if (!authToken) {
+        alert('Vui lòng đăng nhập trước khi tạo dự án!');
+        return openAuthModal();
+      }
+      openModal('projectModal');
+    }
+    function openAuthModal() { openModal('authModal'); }
+
+    // Toggle chế độ Auth
+    function toggleAuthMode() {
+      authMode = authMode === 'login' ? 'register' : 'login';
+      const nameGroup = document.getElementById('nameGroup');
+      const authTitle = document.getElementById('authTitle');
+      const authBtn = document.getElementById('authBtn');
+      const authToggleText = document.getElementById('authToggleText');
+      const authToggleLink = document.getElementById('authToggleLink');
+
+      if (authMode === 'register') {
+        nameGroup.style.display = 'block';
+        authTitle.innerText = '📝 Đăng Ký Tài Khoản Mới';
+        authBtn.innerText = 'Đăng Ký';
+        authToggleText.innerText = 'Đã có tài khoản?';
+        authToggleLink.innerText = 'Đăng nhập';
+      } else {
+        nameGroup.style.display = 'none';
+        authTitle.innerText = '🔑 Đăng Nhập Hệ Thống';
+        authBtn.innerText = 'Đăng Nhập';
+        authToggleText.innerText = 'Chưa có tài khoản?';
+        authToggleLink.innerText = 'Đăng ký ngay';
+      }
+    }
+
+    // Kiểm tra trạng thái đăng nhập
+    async function checkLoginStatus() {
+      if (!authToken) {
+        renderAuthUI(null);
+        return;
+      }
+      try {
+        const res = await fetch('/api/auth/me', {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        if (res.ok) {
+          currentUser = await res.json();
+          renderAuthUI(currentUser);
+        } else {
+          logout();
+        }
+      } catch (err) {
+        logout();
+      }
+    }
+
+    function renderAuthUI(user) {
+      const sec = document.getElementById('userSection');
+      if (user) {
+        sec.innerHTML = `
+          <span style="font-size: 13px; font-weight: 600; color: #334155;">👤 ${user.name} (${user.role})</span>
+          <button class="btn btn-outline" onclick="logout()">Đăng Xuất</button>
+        `;
+      } else {
+        sec.innerHTML = `<button class="btn btn-primary" onclick="openAuthModal()">🔑 Đăng Nhập / Đăng Ký</button>`;
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('vku_auth_token');
+      authToken = null;
+      currentUser = null;
+      renderAuthUI(null);
+      fetchProjects();
+    }
+
+    // Xử lý Auth Submit
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('authEmail').value;
+      const password = document.getElementById('authPassword').value;
+      const name = document.getElementById('authName').value;
+
+      const endpoint = authMode === 'login' ? '/api/auth/login' : '/api/auth/register';
+      const payload = authMode === 'login' ? { email, password } : { name, email, password };
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Thao tác thất bại');
+
+        localStorage.setItem('vku_auth_token', data.token);
+        authToken = data.token;
+        currentUser = data.user;
+        renderAuthUI(currentUser);
+        closeModal('authModal');
+        await fetchProjects();
+        await loadTasks();
+        alert(data.message || 'Thành công!');
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Tải danh sách Dự án
+    async function fetchProjects() {
+      const select = document.getElementById('projectSelect');
+      const taskSelect = document.getElementById('taskProject');
+      if (!authToken) {
+        select.innerHTML = '<option value="">-- Tất cả công việc --</option>';
+        taskSelect.innerHTML = '<option value="">(Không gán dự án)</option>';
+        return;
+      }
+      try {
+        const res = await fetch('/api/projects', {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        if (res.ok) {
+          const resData = await res.json();
+          projectsList = resData.data || [];
+          
+          let optionsHtml = '<option value="">-- Tất cả công việc --</option>';
+          let taskOptionsHtml = '<option value="">(Không gán dự án)</option>';
+
+          projectsList.forEach(p => {
+            optionsHtml += `<option value="${p._id}">${p.name}</option>`;
+            taskOptionsHtml += `<option value="${p._id}">${p.name}</option>`;
+          });
+
+          select.innerHTML = optionsHtml;
+          taskSelect.innerHTML = taskOptionsHtml;
+        }
+      } catch (e) {
+        console.warn('Lỗi tải danh sách dự án:', e);
+      }
+    }
+
+    // Xử lý tạo dự án mới
+    async function handleCreateProject(e) {
+      e.preventDefault();
+      const name = document.getElementById('projName').value;
+      const description = document.getElementById('projDesc').value;
+
+      try {
+        const res = await fetch('/api/projects', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ name, description })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        closeModal('projectModal');
+        document.getElementById('projectForm').reset();
+        await fetchProjects();
+        alert('Tạo dự án mới thành công!');
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Tải danh sách công việc (Kanban)
+    async function loadTasks() {
+      const projectId = document.getElementById('projectSelect').value;
+      let url = '/api/tasks';
+      if (projectId) url += `?projectId=${projectId}`;
+
+      try {
+        const headers = {};
+        if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+        const res = await fetch(url, { headers });
+        const resJson = await res.json();
+        currentTasks = resJson.data || [];
+        renderKanban(currentTasks);
+      } catch (err) {
+        console.error('Lỗi tải công việc:', err);
+      }
+    }
+
+    // Hiển thị giao diện Kanban
+    function renderKanban(tasks) {
+      const cols = {
+        TODO: document.getElementById('col-list-TODO'),
+        IN_PROGRESS: document.getElementById('col-list-IN_PROGRESS'),
+        IN_REVIEW: document.getElementById('col-list-IN_REVIEW'),
+        DONE: document.getElementById('col-list-DONE')
+      };
+
+      const counts = { TODO: 0, IN_PROGRESS: 0, IN_REVIEW: 0, DONE: 0 };
+      Object.values(cols).forEach(col => col.innerHTML = '');
+
+      tasks.forEach(task => {
+        const status = task.status || (task.completed ? 'DONE' : 'TODO');
+        counts[status] = (counts[status] || 0) + 1;
+
+        const card = document.createElement('div');
+        card.className = 'task-card';
+
+        let attachmentsHtml = '';
+        if (task.attachments && task.attachments.length > 0) {
+          attachmentsHtml = `<div class="task-attachments">
+            📎 <b>Tệp (${task.attachments.length}):</b><br/>
+            ${task.attachments.map(att => `<a class="attachment-item" href="${att.fileUrl}" target="_blank">📄 ${att.fileName}</a>`).join('')}
+          </div>`;
+        }
+
+        card.innerHTML = `
+          <div class="task-card-title">${escapeHtml(task.title)}</div>
+          <div class="task-card-desc">${escapeHtml(task.description || 'Chưa có mô tả')}</div>
+          <div>
+            <span class="prio-badge prio-${task.priority}">${task.priority}</span>
+            ${task.dueDate ? `<span style="font-size: 11px; color: var(--muted); margin-left: 6px;">📅 ${task.dueDate}</span>` : ''}
+          </div>
+          ${attachmentsHtml}
+          <div class="card-actions">
+            <select class="status-select" onchange="changeTaskStatus('${task._id}', this.value)">
+              <option value="TODO" ${status === 'TODO' ? 'selected' : ''}>📋 Cần làm</option>
+              <option value="IN_PROGRESS" ${status === 'IN_PROGRESS' ? 'selected' : ''}>⚙️ Đang làm</option>
+              <option value="IN_REVIEW" ${status === 'IN_REVIEW' ? 'selected' : ''}>🔍 Chờ duyệt</option>
+              <option value="DONE" ${status === 'DONE' ? 'selected' : ''}>✅ Đã xong</option>
+            </select>
+            <div style="display: flex; gap: 4px;">
+              <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="openUploadModal('${task._id}')" title="Đính kèm tệp">📎</button>
+              <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteTask('${task._id}')" title="Xóa">🗑️</button>
+            </div>
+          </div>
+        `;
+
+        if (cols[status]) cols[status].appendChild(card);
+      });
+
+      // Cập nhật số đếm trên Header cột
+      document.getElementById('count-TODO').innerText = counts.TODO;
+      document.getElementById('count-IN_PROGRESS').innerText = counts.IN_PROGRESS;
+      document.getElementById('count-IN_REVIEW').innerText = counts.IN_REVIEW;
+      document.getElementById('count-DONE').innerText = counts.DONE;
+
+      // Cập nhật Stats tổng quan
+      const total = tasks.length;
+      document.getElementById('totalTasksCount').innerText = total;
+      document.getElementById('inProgressTasksCount').innerText = counts.IN_PROGRESS;
+      document.getElementById('doneTasksCount').innerText = counts.DONE;
+
+      const pct = total === 0 ? 0 : Math.round((counts.DONE / total) * 100);
+      document.getElementById('progressPercentage').innerText = `${pct}%`;
+    }
+
+    // Xử lý tạo Task
+    async function handleCreateTask(e) {
+      e.preventDefault();
+      const title = document.getElementById('taskTitle').value;
+      const description = document.getElementById('taskDesc').value;
+      const priority = document.getElementById('taskPriority').value;
+      const dueDate = document.getElementById('taskDueDate').value;
+      const projectId = document.getElementById('taskProject').value || null;
+
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+        const res = await fetch('/api/tasks', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ title, description, priority, dueDate, projectId, status: 'TODO' })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        closeModal('taskModal');
+        document.getElementById('taskForm').reset();
+        await loadTasks();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Đổi trạng thái Task
+    async function changeTaskStatus(id, newStatus) {
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+        const res = await fetch(`/api/tasks/${id}`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({ status: newStatus })
+        });
+        if (!res.ok) throw new Error('Không thể cập nhật trạng thái');
+        await loadTasks();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Xóa Task
+    async function deleteTask(id) {
+      if (!confirm('Bạn có chắc chắn muốn xóa công việc này?')) return;
+      try {
+        const headers = {};
+        if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+        const res = await fetch(`/api/tasks/${id}`, {
+          method: 'DELETE',
+          headers
+        });
+        if (!res.ok) throw new Error('Xóa thất bại');
+        await loadTasks();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Upload tệp đính kèm
+    function openUploadModal(taskId) {
+      document.getElementById('uploadTaskId').value = taskId;
+      openModal('uploadModal');
+    }
+
+    async function handleUploadSubmit(e) {
+      e.preventDefault();
+      const taskId = document.getElementById('uploadTaskId').value;
+      const fileInput = document.getElementById('fileInput');
+      if (!fileInput.files[0]) return;
+
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+
+      try {
+        const res = await fetch(`/api/tasks/${taskId}/attachments`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        closeModal('uploadModal');
+        fileInput.value = '';
+        await loadTasks();
+        alert('Tải lên tệp đính kèm thành công!');
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Xuất báo cáo Excel
+    async function exportExcelReport() {
+      const projectId = document.getElementById('projectSelect').value;
+      let url = '/api/tasks/actions/export';
+      if (projectId) url += `?projectId=${projectId}`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        // Kích hoạt tải về
+        window.open(data.downloadUrl, '_blank');
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Tải metrics giám sát Cloud
+    async function fetchHealthMetrics() {
+      try {
+        const res = await fetch('/api/health');
+        if (res.ok) {
+          const d = await res.json();
+          document.getElementById('cloudEnvBadge').innerText = `${d.cloudEnvironment.provider} • Uptime ${d.uptimeSeconds}s`;
+        }
+      } catch (e) {
+        console.warn('Lỗi lấy health metric:', e);
+      }
+    }
+
+    async function openHealthModal() {
+      openModal('healthModal');
+      const box = document.getElementById('healthContent');
+      box.innerHTML = '<p>Đang tải dữ liệu Cloud Observability...</p>';
+
+      try {
+        const res = await fetch('/api/health');
+        const d = await res.json();
+        box.innerHTML = `
+          <div class="health-metric"><b>Môi trường Đám mây:</b> ${d.cloudEnvironment.provider} (${d.cloudEnvironment.platform})</div>
+          <div class="health-metric"><b>Runtime:</b> Node ${d.cloudEnvironment.nodeVersion} (${d.cloudEnvironment.cpuCores} CPU Cores)</div>
+          <div class="health-metric"><b>Cơ sở dữ liệu (DBaaS):</b> <span style="color: green; font-weight: 600;">${d.integrations.database}</span></div>
+          <div class="health-metric"><b>Hệ thống Caching:</b> <span style="color: #2563eb; font-weight: 600;">${d.integrations.caching}</span></div>
+          <div class="health-metric"><b>Hàng đợi tác vụ (Message Queue):</b> <span style="color: #d97706; font-weight: 600;">${d.integrations.backgroundQueue}</span></div>
+          <div class="health-metric"><b>Bộ nhớ Tiến trình:</b> RSS: ${d.processMetrics.rssMB} MB | Heap: ${d.processMetrics.heapUsedMB}/${d.processMetrics.heapTotalMB} MB</div>
+          <div class="health-metric"><b>Thời gian hoạt động (Uptime):</b> ${d.uptimeSeconds} giây</div>
+        `;
+      } catch (err) {
+        box.innerHTML = `<p style="color: red;">Không thể tải dữ liệu giám sát: ${err.message}</p>`;
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
