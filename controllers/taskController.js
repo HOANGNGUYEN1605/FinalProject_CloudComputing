@@ -4,16 +4,48 @@ const Project = require('../models/Project');
 const { getCache, setCache, clearCache } = require('../services/cacheService');
 const { addQueueJob, generateExcelReport } = require('../services/queueService');
 
+// 1. Lấy danh sách công việc tách biệt theo từng tài khoản (User Multi-tenancy)
 exports.getTasks = async (req, res) => {
   try {
     const { projectId, status, priority } = req.query;
-    const filter = {};
 
+    // Nếu người dùng chưa đăng nhập, trả về danh sách trống để bảo mật dữ liệu riêng tư
+    if (!req.user) {
+      return res.status(200).json({
+        source: 'database',
+        data: [],
+        message: 'Yêu cầu đăng nhập để xem công việc riêng'
+      });
+    }
+
+    const userId = req.user.id;
+
+    // Lấy danh sách ID các dự án mà user là chủ sở hữu hoặc là thành viên
+    const accessibleProjects = await Project.find({
+      $or: [{ owner: userId }, { members: userId }]
+    }).select('_id');
+    const projectIds = accessibleProjects.map(p => p._id);
+
+    // Điều kiện phân quyền: User chỉ xem task do mình tạo, hoặc được gán cho mình, hoặc thuộc dự án của mình
+    let userFilter = {
+      $or: [
+        { creator: userId },
+        { assignee: userId },
+        { project: { $in: projectIds } }
+      ]
+    };
+
+    // Nếu là Admin thì có quyền xem toàn bộ hệ thống
+    if (req.user.role === 'admin') {
+      userFilter = {};
+    }
+
+    const filter = { ...userFilter };
     if (projectId) filter.project = projectId;
     if (status) filter.status = status;
     if (priority) filter.priority = priority;
 
-    const cacheKey = `tasks_${JSON.stringify(filter)}`;
+    const cacheKey = `tasks_${userId}_${JSON.stringify(filter)}`;
     const cached = await getCache(cacheKey);
     if (cached) {
       return res.status(200).json({ source: 'cache', data: cached });
@@ -32,8 +64,13 @@ exports.getTasks = async (req, res) => {
   }
 };
 
+// 2. Tạo công việc mới gắn với tài khoản đang đăng nhập
 exports.createTask = async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Vui lòng đăng nhập trước khi tạo công việc' });
+    }
+
     const { title, description, priority, dueDate, projectId, assigneeId, status } = req.body;
 
     if (!title) {
@@ -48,7 +85,7 @@ exports.createTask = async (req, res) => {
       status: status || 'TODO',
       project: projectId || null,
       assignee: assigneeId || null,
-      creator: req.user ? req.user.id : null
+      creator: req.user.id // Luôn gắn với User ID của tài khoản đang đăng nhập
     });
 
     // Xóa cache danh sách task
@@ -85,6 +122,7 @@ exports.createTask = async (req, res) => {
   }
 };
 
+// 3. Cập nhật công việc
 exports.updateTask = async (req, res) => {
   try {
     const { id } = req.params;
@@ -109,14 +147,26 @@ exports.updateTask = async (req, res) => {
   }
 };
 
+// 4. Xóa công việc
 exports.deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
-    const deleted = await Task.findByIdAndDelete(id);
-    if (!deleted) {
+
+    const task = await Task.findById(id);
+    if (!task) {
       return res.status(404).json({ error: 'Không tìm thấy công việc' });
     }
 
+    // Kiểm tra quyền xóa: Chỉ người tạo, người được gán, hoặc admin mới được xóa
+    if (req.user && req.user.role !== 'admin') {
+      const isCreator = task.creator && task.creator.toString() === req.user.id;
+      const isAssignee = task.assignee && task.assignee.toString() === req.user.id;
+      if (!isCreator && !isAssignee) {
+        return res.status(403).json({ error: 'Bạn chỉ có quyền xóa công việc do chính mình tạo hoặc được phân công' });
+      }
+    }
+
+    await Task.findByIdAndDelete(id);
     await clearCache('tasks_');
 
     res.status(200).json({ message: 'Đã xóa công việc thành công' });
@@ -125,7 +175,7 @@ exports.deleteTask = async (req, res) => {
   }
 };
 
-// Upload tệp đính kèm vào Task
+// 5. Upload tệp đính kèm vào Task
 exports.uploadAttachment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -161,14 +211,31 @@ exports.uploadAttachment = async (req, res) => {
   }
 };
 
-// Xuất báo cáo Excel công việc bất đồng bộ
+// 6. Xuất báo cáo Excel công việc bất đồng bộ theo quyền hạn
 exports.exportTasksReport = async (req, res) => {
   try {
     const { projectId } = req.query;
-    const filter = projectId ? { project: projectId } : {};
+
+    let filter = {};
+    if (req.user && req.user.role !== 'admin') {
+      const accessibleProjects = await Project.find({
+        $or: [{ owner: req.user.id }, { members: req.user.id }]
+      }).select('_id');
+      const projectIds = accessibleProjects.map(p => p._id);
+
+      filter = {
+        $or: [
+          { creator: req.user.id },
+          { assignee: req.user.id },
+          { project: { $in: projectIds } }
+        ]
+      };
+    }
+
+    if (projectId) filter.project = projectId;
 
     const tasks = await Task.find(filter).populate('assignee', 'name email');
-    let projectName = 'Toàn bộ hệ thống';
+    let projectName = 'Dự án của bạn';
 
     if (projectId) {
       const project = await Project.findById(projectId);

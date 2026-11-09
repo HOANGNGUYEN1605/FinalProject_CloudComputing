@@ -1587,7 +1587,7 @@ function renderKanban() {
   const total = tasks.length;
   const emptyIcons = { TODO: '📋', IN_PROGRESS: '⚙️', IN_REVIEW: '🔍', DONE: '✅' };
   const emptyTexts = {
-    TODO: 'Chưa có công việc',
+    TODO: currentUser ? 'Chưa có công việc' : 'Đăng nhập để xem công việc của bạn',
     IN_PROGRESS: 'Không có task đang chạy',
     IN_REVIEW: 'Không có task chờ review',
     DONE: 'Chưa hoàn tất công việc nào'
@@ -1697,6 +1697,11 @@ function updateStats() {
 //  TASK MODAL (CREATE / EDIT)
 // =============================================
 function openTaskModal() {
+  if (!authToken) {
+    toast('Vui lòng đăng nhập trước khi tạo công việc', 'error');
+    openAuthModal();
+    return;
+  }
   document.getElementById('editTaskId').value = '';
   document.getElementById('taskModalIcon').textContent = '✚';
   document.getElementById('taskModalTitle').textContent = 'Thêm Công Việc Mới';
