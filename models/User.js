@@ -17,8 +17,16 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, 'Mật khẩu không được để trống'],
-      minlength: [6, 'Mật khẩu phải từ 6 ký tự trở lên']
+      default: ''
+    },
+    googleId: {
+      type: String,
+      default: null
+    },
+    authProvider: {
+      type: String,
+      enum: ['local', 'google'],
+      default: 'local'
     },
     role: {
       type: String,
