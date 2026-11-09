@@ -1273,11 +1273,18 @@ function renderAuthUI(user) {
 
 function logout(showToast = true) {
   localStorage.removeItem('vku_auth_token');
-  authToken = null; currentUser = null; usersList = [];
+  authToken = null;
+  currentUser = null;
+  usersList = [];
+  allTasks = [];
+  projectsList = [];
+  currentProjectFilter = '';
+  document.getElementById('pageTitle').textContent = 'Tất cả công việc';
+  renderSidebarProjects();
+  renderKanban();
+  updateStats();
   renderAuthUI(null);
   if (showToast) toast('Đã đăng xuất thành công', 'info');
-  fetchProjects();
-  loadTasks();
 }
 
 function setAuthMode(mode) {
@@ -1522,11 +1529,18 @@ async function handleCreateProject(e) {
 //  TASKS
 // =============================================
 async function loadTasks() {
+  if (!authToken) {
+    allTasks = [];
+    renderKanban();
+    updateStats();
+    return;
+  }
   let url = '/api/tasks';
   if (currentProjectFilter) url += `?projectId=${currentProjectFilter}`;
   try {
-    const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
-    const res = await fetch(url, { headers });
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${authToken}` }
+    });
     const json = await res.json();
     if (!res.ok) {
       throw new Error(json.error || `HTTP ${res.status}`);
