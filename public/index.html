@@ -1,868 +1,1808 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cloud Collaboration Platform - VKU Final Project</title>
+  <title>CloudBoard — VKU Cloud Computing Final Project</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" />
   <style>
+    /* ===== DESIGN TOKENS ===== */
     :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
+      --primary: #6366f1;
+      --primary-light: #818cf8;
+      --primary-dark: #4f46e5;
+      --primary-bg: #eef2ff;
+      --success: #10b981;
+      --success-bg: #d1fae5;
+      --warning: #f59e0b;
+      --warning-bg: #fef3c7;
+      --danger: #ef4444;
+      --danger-bg: #fee2e2;
+      --info: #3b82f6;
+      --info-bg: #dbeafe;
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --surface2: #f8fafc;
       --border: #e2e8f0;
+      --border-light: #f1f5f9;
       --text: #0f172a;
-      --muted: #64748b;
-      --success: #16a34a;
-      --warning: #d97706;
-      --danger: #dc2626;
-      --todo-border: #94a3b8;
-      --progress-border: #3b82f6;
-      --review-border: #f59e0b;
-      --done-border: #10b981;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --sidebar-bg: #1e1b4b;
+      --sidebar-hover: rgba(255,255,255,0.08);
+      --sidebar-active: rgba(99,102,241,0.3);
+      --sidebar-text: rgba(255,255,255,0.75);
+      --sidebar-text-active: #ffffff;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 30px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08);
+      --radius: 10px;
+      --radius-lg: 16px;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface2: #162032;
+      --border: #334155;
+      --border-light: #1e293b;
+      --text: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --sidebar-bg: #0d0a2e;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
     }
 
-    * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
-    body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 60px; }
-
-    /* Navbar */
-    .navbar {
-      background: #ffffff;
-      border-bottom: 1px solid var(--border);
-      padding: 14px 24px;
+    /* ===== RESET & BASE ===== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 15px; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       display: flex;
-      justify-content: space-between;
+      min-height: 100vh;
+      transition: var(--transition);
+    }
+    ::selection { background: var(--primary); color: white; }
+    input, select, textarea, button { font-family: inherit; }
+
+    /* ===== TOAST NOTIFICATIONS ===== */
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      display: flex;
       align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      font-size: 14px;
+      font-weight: 500;
+      max-width: 360px;
+      pointer-events: all;
+      animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+      color: var(--text);
+    }
+    .toast.toast-success { border-left: 4px solid var(--success); }
+    .toast.toast-error   { border-left: 4px solid var(--danger); }
+    .toast.toast-info    { border-left: 4px solid var(--info); }
+    .toast-icon { font-size: 18px; flex-shrink: 0; }
+    @keyframes slideInRight {
+      from { transform: translateX(120%); opacity: 0; }
+      to   { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes fadeOut {
+      to { opacity: 0; transform: translateX(120%); }
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 250px;
+      min-width: 250px;
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 50;
+      transition: transform 0.3s ease;
+      overflow-y: auto;
+    }
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 8px;
+    }
+    .sidebar-logo-icon {
+      width: 36px; height: 36px;
+      background: var(--primary);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .sidebar-logo-text { color: white; font-weight: 700; font-size: 16px; line-height: 1.1; }
+    .sidebar-logo-sub  { color: rgba(255,255,255,0.4); font-size: 10px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase; }
+
+    .sidebar-section { padding: 10px 12px 4px; }
+    .sidebar-section-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.3); padding: 0 8px; margin-bottom: 4px; }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      color: var(--sidebar-text);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 2px;
+      position: relative;
+      text-decoration: none;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+    .sidebar-item:hover { background: var(--sidebar-hover); color: white; }
+    .sidebar-item.active { background: var(--sidebar-active); color: var(--sidebar-text-active); }
+    .sidebar-item .item-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+    .sidebar-item .item-badge {
+      margin-left: auto;
+      background: var(--primary);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 999px;
+    }
+
+    .sidebar-projects { padding: 0 12px 12px; }
+    .sidebar-proj-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.55);
+      font-size: 13px;
+      font-weight: 500;
+      transition: var(--transition);
+      margin-bottom: 1px;
+    }
+    .sidebar-proj-item:hover { background: var(--sidebar-hover); color: white; }
+    .sidebar-proj-item.active { background: var(--sidebar-active); color: white; }
+    .proj-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 12px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+      color: rgba(255,255,255,0.75);
+    }
+    .user-card:hover { background: var(--sidebar-hover); }
+    .user-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: 13px; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-wrapper {
+      margin-left: 250px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      min-width: 0;
+    }
+
+    /* ===== TOP BAR ===== */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
       position: sticky;
       top: 0;
-      z-index: 100;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+      z-index: 40;
+      backdrop-filter: blur(10px);
     }
-    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; color: #1e293b; }
-    .nav-actions { display: flex; align-items: center; gap: 10px; }
+    .topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .page-title { font-size: 18px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .page-subtitle { font-size: 12px; color: var(--text-muted); }
+    .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 
-    /* Badges */
-    .badge {
+    /* Buttons */
+    .btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 12px;
+      gap: 7px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-size: 13px;
       font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+      text-decoration: none;
     }
-    .badge-cloud { background: #dbeafe; color: #1e40af; }
-    .badge-status { background: #dcfce7; color: #15803d; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
+    .btn-ghost { background: transparent; color: var(--text-secondary); border-color: var(--border); }
+    .btn-ghost:hover { background: var(--surface2); }
+    .btn-success-soft { background: var(--success-bg); color: var(--success); border-color: transparent; }
+    .btn-success-soft:hover { background: #a7f3d0; }
+    .btn-danger-soft { background: var(--danger-bg); color: var(--danger); }
+    .btn-danger-soft:hover { background: #fca5a5; }
+    .btn-icon { padding: 7px; border-radius: 7px; }
+    .btn-sm { padding: 5px 11px; font-size: 12px; border-radius: 6px; }
 
-    /* Container */
-    .container { max-width: 1380px; margin: 24px auto; padding: 0 20px; }
+    /* ===== PAGE CONTENT ===== */
+    .page-content { padding: 24px 28px; flex: 1; }
 
-    /* Stats Grid */
-    .stats-grid {
+    /* ===== STAT CARDS ===== */
+    .stats-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(4, 1fr);
       gap: 16px;
       margin-bottom: 24px;
     }
     .stat-card {
-      background: var(--card-bg);
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
     }
-    .stat-card h4 { margin: 0; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-card p { margin: 6px 0 0; font-size: 26px; font-weight: 700; color: var(--text); }
-    .stat-icon { font-size: 28px; opacity: 0.8; }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 60px; height: 60px;
+      border-radius: 0 var(--radius-lg) 0 60px;
+      opacity: 0.08;
+    }
+    .stat-card.card-blue::before { background: var(--info); }
+    .stat-card.card-purple::before { background: var(--primary); }
+    .stat-card.card-green::before { background: var(--success); }
+    .stat-card.card-orange::before { background: var(--warning); }
+    .stat-label { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .stat-value { font-size: 32px; font-weight: 800; color: var(--text); line-height: 1; margin-bottom: 10px; }
+    .stat-footer { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+    .stat-trend { font-weight: 600; }
+    .stat-trend.up { color: var(--success); }
+    .stat-trend.neutral { color: var(--warning); }
 
-    /* Action bar */
-    .toolbar {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 20px;
+    /* Progress bar */
+    .progress-bar-wrap { width: 100%; height: 5px; background: var(--border); border-radius: 999px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; border-radius: 999px; background: var(--primary); transition: width 0.6s ease; }
+
+    /* ===== TOOLBAR ===== */
+    .board-toolbar {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       flex-wrap: wrap;
       gap: 12px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 18px;
     }
-    .toolbar-left, .toolbar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-
-    /* Buttons */
-    .btn {
-      padding: 8px 16px;
-      border-radius: 8px;
-      border: 1px solid transparent;
-      font-weight: 600;
+    .toolbar-left, .toolbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .board-tabs { display: flex; gap: 2px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
+    .board-tab {
+      padding: 5px 14px;
+      border-radius: 6px;
+      border: none;
+      background: none;
       font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.15s ease;
+      transition: var(--transition);
     }
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-primary:hover { background: var(--primary-hover); }
-    .btn-outline { background: #fff; border-color: var(--border); color: #334155; }
-    .btn-outline:hover { background: #f1f5f9; }
-    .btn-success { background: var(--success); color: #fff; }
-    .btn-danger { background: #fee2e2; color: var(--danger); border-color: #fecaca; }
-    .btn-danger:hover { background: #fca5a5; }
+    .board-tab.active { background: var(--surface); color: var(--primary); box-shadow: var(--shadow-sm); }
 
-    /* Kanban Board Layout */
+    /* Search box */
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .search-box input {
+      border: none;
+      background: none;
+      outline: none;
+      font-size: 13px;
+      color: var(--text);
+      width: 160px;
+    }
+
+    /* Filter chips */
+    .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .chip {
+      padding: 4px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-secondary);
+      transition: var(--transition);
+    }
+    .chip:hover, .chip.active { background: var(--primary-bg); color: var(--primary); border-color: var(--primary-light); }
+
+    /* ===== KANBAN BOARD ===== */
     .kanban-board {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
+      gap: 18px;
       align-items: start;
     }
-    @media (max-width: 1024px) {
-      .kanban-board { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 640px) {
-      .kanban-board { grid-template-columns: 1fr; }
-    }
 
-    .kanban-column {
-      background: #f1f5f9;
-      border-radius: 14px;
-      padding: 16px;
-      min-height: 520px;
-      border: 1px solid #e2e8f0;
-    }
-    .column-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid;
-    }
-    .col-todo { border-bottom-color: var(--todo-border); }
-    .col-progress { border-bottom-color: var(--progress-border); }
-    .col-review { border-bottom-color: var(--review-border); }
-    .col-done { border-bottom-color: var(--done-border); }
-
-    .column-header h3 { margin: 0; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-    .col-count { background: #e2e8f0; color: #475569; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
-
-    /* Task Card */
-    .task-card {
-      background: #ffffff;
+    .kanban-col {
+      background: var(--surface2);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      min-height: 500px;
     }
-    .task-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
-    .task-card-title { font-weight: 700; font-size: 14px; margin-bottom: 6px; color: #1e293b; }
-    .task-card-desc { font-size: 13px; color: var(--muted); margin-bottom: 10px; line-height: 1.4; }
-    
-    .prio-badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+    .col-header {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .col-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .col-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .col-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .dot-todo     { background: #94a3b8; }
+    .dot-progress { background: #3b82f6; }
+    .dot-review   { background: #f59e0b; }
+    .dot-done     { background: #10b981; }
+
+    .col-count-badge {
+      background: var(--border);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 8px;
+      border-radius: 999px;
+    }
+    .col-progress-bar { height: 3px; border-radius: 999px; overflow: hidden; background: var(--border); }
+    .col-progress-fill { height: 100%; border-radius: 999px; transition: width 0.5s ease; }
+    .fill-todo     { background: #94a3b8; }
+    .fill-progress { background: #3b82f6; }
+    .fill-review   { background: #f59e0b; }
+    .fill-done     { background: #10b981; }
+
+    .col-body { padding: 12px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    .col-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px 16px;
+      color: var(--text-muted);
+    }
+    .col-empty-icon { font-size: 32px; margin-bottom: 10px; opacity: 0.5; }
+    .col-empty-text { font-size: 13px; }
+
+    /* ===== TASK CARD ===== */
+    .task-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+    }
+    .task-card:hover {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.08), var(--shadow-sm);
+      transform: translateY(-2px);
+    }
+    .task-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .task-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.4; flex: 1; }
+    .task-title.done { text-decoration: line-through; color: var(--text-muted); }
+
+    .task-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .task-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .prio-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
     .prio-Urgent { background: #fee2e2; color: #991b1b; }
-    .prio-High { background: #ffedd5; color: #c2410c; }
+    .prio-High   { background: #ffedd5; color: #c2410c; }
     .prio-Medium { background: #fef9c3; color: #854d0e; }
-    .prio-Low { background: #e0f2fe; color: #075985; }
+    .prio-Low    { background: #e0f2fe; color: #075985; }
 
-    .task-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--muted); margin-top: 10px; }
-    .task-attachments { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 12px; }
-    .attachment-item { display: inline-flex; align-items: center; gap: 4px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; margin-top: 4px; text-decoration: none; color: var(--primary); }
-    
-    .card-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid #f1f5f9; }
-    .status-select { font-size: 12px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
+    .due-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--surface2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .due-tag.overdue { background: var(--danger-bg); color: var(--danger); border-color: #fca5a5; }
 
-    /* Modals */
+    .task-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-light);
+    }
+    .task-assignee {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .avatar-xs {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--primary-bg);
+      color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .task-actions-row { display: flex; gap: 4px; }
+    .task-action-btn {
+      width: 26px; height: 26px;
+      border-radius: 6px;
+      border: none;
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      transition: var(--transition);
+    }
+    .task-action-btn:hover { background: var(--primary-bg); color: var(--primary); }
+    .task-action-btn.del:hover { background: var(--danger-bg); color: var(--danger); }
+
+    .attach-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+    }
+    .attach-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--info-bg);
+      color: var(--info);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .attach-chip:hover { background: #bfdbfe; }
+
+    /* ===== MODALS ===== */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.5);
+      background: rgba(15,23,42,0.6);
+      backdrop-filter: blur(4px);
       display: none;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       z-index: 1000;
-      padding: 16px;
+      padding: 20px;
+      animation: fadeInBg 0.2s ease;
     }
+    @keyframes fadeInBg { from { opacity: 0; } to { opacity: 1; } }
+
     .modal {
-      background: #ffffff;
-      border-radius: 14px;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
       width: 100%;
       max-width: 520px;
       max-height: 90vh;
       overflow-y: auto;
-      padding: 24px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-    .modal-header h3 { margin: 0; font-size: 18px; }
-    .close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); }
-    
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #334155; }
-    .form-control { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .modal-lg { max-width: 680px; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Health Modal Box */
-    .health-metric { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; font-size: 13px; }
-    .health-metric b { color: #1e293b; }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 24px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-title-wrap { display: flex; align-items: center; gap: 10px; }
+    .modal-icon { font-size: 20px; }
+    .modal-title { font-size: 17px; font-weight: 700; color: var(--text); }
+    .modal-close {
+      width: 30px; height: 30px;
+      border-radius: 7px;
+      border: none;
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      transition: var(--transition);
+    }
+    .modal-close:hover { background: var(--danger-bg); color: var(--danger); }
+    .modal-body { padding: 22px 24px; }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+    /* Form elements */
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; }
+    .form-control {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      transition: var(--transition);
+    }
+    .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+    .form-control::placeholder { color: var(--text-muted); }
+    textarea.form-control { resize: vertical; min-height: 80px; }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+    .form-hint { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+
+    /* Auth Tabs */
+    .auth-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 22px; }
+    .auth-tab { flex: 1; padding: 12px; text-align: center; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent; transition: var(--transition); background: none; border-top: none; border-left: none; border-right: none; margin-bottom: -1px; }
+    .auth-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    /* Cloud Monitoring Panel */
+    .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .metric-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .metric-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .metric-value { font-size: 18px; font-weight: 700; color: var(--text); }
+    .metric-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .status-dot { display: inline-flex; align-items: center; gap: 6px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; animation: pulse 2s infinite; }
+    .dot-green { background: var(--success); }
+    .dot-yellow { background: var(--warning); }
+    .dot-red { background: var(--danger); }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    /* Upload Drop Zone */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-muted);
+    }
+    .drop-zone:hover, .drop-zone.drag-over { border-color: var(--primary); background: var(--primary-bg); color: var(--primary); }
+    .drop-zone-icon { font-size: 36px; margin-bottom: 10px; }
+    .drop-zone p { font-size: 14px; font-weight: 500; }
+    .drop-zone small { font-size: 12px; opacity: 0.7; }
+
+    /* Dark mode toggle */
+    .theme-toggle {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      transition: var(--transition);
+    }
+    .theme-toggle:hover { background: var(--primary-bg); color: var(--primary); border-color: var(--primary-light); }
+
+    /* Cloud badge */
+    .cloud-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--primary-bg);
+      color: var(--primary);
+      border: 1px solid var(--primary-light);
+    }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: pulse 1.5s infinite; }
+
+    /* Spinner */
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1280px) { .kanban-board { grid-template-columns: repeat(2, 1fr); } .stats-row { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-wrapper { margin-left: 0; }
+      .kanban-board { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .topbar { padding: 12px 16px; }
+      .page-content { padding: 16px; }
+    }
+    @media (max-width: 480px) { .stats-row { grid-template-columns: 1fr; } .form-row-2, .form-row-3 { grid-template-columns: 1fr; } }
+
+    /* Divider */
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+    /* Scroll */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
   </style>
 </head>
 <body>
 
-  <!-- Navbar -->
-  <nav class="navbar">
-    <div class="brand">
-      <span>☁️</span>
-      <span>Cloud Collaboration Platform</span>
-      <span class="badge badge-cloud" id="cloudEnvBadge">Render / Atlas</span>
-    </div>
-    <div class="nav-actions">
-      <button class="btn btn-outline" onclick="openHealthModal()">🔍 Giám Sát Cloud</button>
-      <button class="btn btn-success" onclick="exportExcelReport()">📊 Xuất Báo Cáo Excel</button>
-      <div id="userSection">
-        <button class="btn btn-primary" onclick="openAuthModal()">🔑 Đăng Nhập / Đăng Ký</button>
-      </div>
-    </div>
-  </nav>
+<!-- ===== TOAST CONTAINER ===== -->
+<div id="toast-container"></div>
 
-  <div class="container">
-    <!-- Stats Row -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div>
-          <h4>Tổng Công Việc</h4>
-          <p id="totalTasksCount">0</p>
-        </div>
-        <div class="stat-icon">📋</div>
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">☁️</div>
+    <div>
+      <div class="sidebar-logo-text">CloudBoard</div>
+      <div class="sidebar-logo-sub">VKU · Cloud Computing</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Điều hướng</div>
+    <button class="sidebar-item active" onclick="switchView('kanban', this)">
+      <span class="item-icon">📋</span> Bảng Kanban
+    </button>
+    <button class="sidebar-item" onclick="openHealthModal()">
+      <span class="item-icon">📡</span> Giám Sát Cloud
+    </button>
+    <button class="sidebar-item" onclick="exportExcelReport()">
+      <span class="item-icon">📊</span> Xuất Báo Cáo Excel
+    </button>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Dự án</div>
+  </div>
+  <div class="sidebar-projects" id="sidebarProjects">
+    <div style="font-size: 12px; color: rgba(255,255,255,0.3); padding: 6px 10px;">Chưa có dự án nào</div>
+  </div>
+  <div style="padding: 0 12px 8px;">
+    <button class="sidebar-item" onclick="openProjectModal()" style="border: 1px dashed rgba(255,255,255,0.15); justify-content: center;">
+      <span class="item-icon">+</span> Tạo dự án mới
+    </button>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="user-card" id="sidebarUserCard" onclick="openAuthModal()">
+      <div class="user-avatar" id="sidebarAvatarIcon">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarUserName">Chưa đăng nhập</div>
+        <div class="user-role" id="sidebarUserRole">Nhấn để đăng nhập</div>
       </div>
-      <div class="stat-card">
-        <div>
-          <h4>Đang Xử Lý</h4>
-          <p id="inProgressTasksCount">0</p>
-        </div>
-        <div class="stat-icon">⚡</div>
+    </div>
+  </div>
+</aside>
+
+<!-- ===== MAIN WRAPPER ===== -->
+<div class="main-wrapper">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="btn btn-ghost btn-icon" id="mobileMenuBtn" onclick="document.getElementById('sidebar').classList.toggle('open')" style="display:none">☰</button>
+      <div>
+        <div class="page-title" id="pageTitle">Tất cả công việc</div>
+        <div class="page-subtitle" id="pageSubtitle">Quản lý & theo dõi tiến độ theo thời gian thực</div>
       </div>
-      <div class="stat-card">
-        <div>
-          <h4>Đã Hoàn Thành</h4>
-          <p id="doneTasksCount">0</p>
-        </div>
-        <div class="stat-icon">✅</div>
+    </div>
+    <div class="topbar-right">
+      <div class="cloud-pill" id="cloudPill">
+        <div class="live-dot"></div>
+        <span id="cloudPillText">Đang kết nối...</span>
       </div>
-      <div class="stat-card">
-        <div>
-          <h4>Tiến Độ Chung</h4>
-          <p id="progressPercentage">0%</p>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Chuyển giao diện Sáng/Tối">🌙</button>
+      <div id="topbarUserArea">
+        <button class="btn btn-primary" onclick="openAuthModal()">🔑 Đăng Nhập</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- PAGE CONTENT -->
+  <main class="page-content">
+
+    <!-- STAT CARDS -->
+    <div class="stats-row">
+      <div class="stat-card card-blue">
+        <div class="stat-label">Tổng công việc</div>
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progTotal" style="width:0%; background:#3b82f6"></div>
         </div>
-        <div class="stat-icon">📈</div>
+        <div class="stat-footer" style="margin-top:8px">
+          <span>Toàn bộ trong hệ thống</span>
+        </div>
+      </div>
+      <div class="stat-card card-purple">
+        <div class="stat-label">Đang thực hiện</div>
+        <div class="stat-value" id="statProgress">0</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progProgress" style="width:0%; background:var(--primary)"></div>
+        </div>
+        <div class="stat-footer" style="margin-top:8px">
+          <span class="stat-trend neutral" id="progRateText">0%</span>&nbsp;tổng số
+        </div>
+      </div>
+      <div class="stat-card card-green">
+        <div class="stat-label">Đã hoàn thành</div>
+        <div class="stat-value" id="statDone">0</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progDone" style="width:0%; background:var(--success)"></div>
+        </div>
+        <div class="stat-footer" style="margin-top:8px">
+          <span class="stat-trend up" id="doneRateText">0%</span>&nbsp;hoàn thành
+        </div>
+      </div>
+      <div class="stat-card card-orange">
+        <div class="stat-label">Tiến độ chung</div>
+        <div class="stat-value" id="statPct">0%</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progOverall" style="width:0%"></div>
+        </div>
+        <div class="stat-footer" style="margin-top:8px">
+          <span>Dựa trên task đã xong</span>
+        </div>
       </div>
     </div>
 
-    <!-- Action Toolbar -->
-    <div class="toolbar">
+    <!-- TOOLBAR -->
+    <div class="board-toolbar">
       <div class="toolbar-left">
-        <label style="font-size: 13px; font-weight: 600; color: var(--muted);">Dự án:</label>
-        <select id="projectSelect" class="form-control" style="width: auto; min-width: 180px;" onchange="loadTasks()">
-          <option value="">-- Tất cả công việc --</option>
-        </select>
-        <button class="btn btn-outline" onclick="openProjectModal()">+ Tạo Dự Án Mới</button>
+        <div class="search-box">
+          🔍
+          <input type="text" id="searchInput" placeholder="Tìm kiếm công việc..." oninput="filterBoard()" />
+        </div>
+        <div class="filter-chips" id="priorityFilters">
+          <span class="chip active" data-prio="all" onclick="setPrioFilter('all', this)">Tất cả</span>
+          <span class="chip" data-prio="Urgent" onclick="setPrioFilter('Urgent', this)">🔴 Khẩn cấp</span>
+          <span class="chip" data-prio="High" onclick="setPrioFilter('High', this)">🟠 Cao</span>
+          <span class="chip" data-prio="Medium" onclick="setPrioFilter('Medium', this)">🟡 Trung bình</span>
+          <span class="chip" data-prio="Low" onclick="setPrioFilter('Low', this)">🔵 Thấp</span>
+        </div>
       </div>
       <div class="toolbar-right">
-        <button class="btn btn-primary" onclick="openTaskModal()">+ Thêm Công Việc Mới</button>
+        <button class="btn btn-ghost btn-sm" onclick="loadTasks()">🔄 Làm mới</button>
+        <button class="btn btn-primary" onclick="openTaskModal()">
+          + Thêm Công Việc
+        </button>
       </div>
     </div>
 
-    <!-- Kanban Board -->
-    <div class="kanban-board">
-      <!-- Cột 1: Cần làm (TODO) -->
-      <div class="kanban-column">
-        <div class="column-header col-todo">
-          <h3>📋 Cần làm <span class="col-count" id="count-TODO">0</span></h3>
-        </div>
-        <div id="col-list-TODO"></div>
-      </div>
-
-      <!-- Cột 2: Đang thực hiện (IN_PROGRESS) -->
-      <div class="kanban-column">
-        <div class="column-header col-progress">
-          <h3>⚙️ Đang làm <span class="col-count" id="count-IN_PROGRESS">0</span></h3>
-        </div>
-        <div id="col-list-IN_PROGRESS"></div>
-      </div>
-
-      <!-- Cột 3: Chờ kiểm tra (IN_REVIEW) -->
-      <div class="kanban-column">
-        <div class="column-header col-review">
-          <h3>🔍 Chờ duyệt <span class="col-count" id="count-IN_REVIEW">0</span></h3>
-        </div>
-        <div id="col-list-IN_REVIEW"></div>
-      </div>
-
-      <!-- Cột 4: Đã hoàn tất (DONE) -->
-      <div class="kanban-column">
-        <div class="column-header col-done">
-          <h3>✅ Hoàn tất <span class="col-count" id="count-DONE">0</span></h3>
-        </div>
-        <div id="col-list-DONE"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Thêm Task mới -->
-  <div class="modal-backdrop" id="taskModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>+ Tạo Công Việc Mới</h3>
-        <button class="close-btn" onclick="closeModal('taskModal')">&times;</button>
-      </div>
-      <form id="taskForm" onsubmit="handleCreateTask(event)">
-        <div class="form-group">
-          <label>Tiêu đề công việc *</label>
-          <input type="text" id="taskTitle" class="form-control" placeholder="Ví dụ: Thiết kế cơ sở dữ liệu trên Cloud..." required />
-        </div>
-        <div class="form-group">
-          <label>Mô tả chi tiết</label>
-          <textarea id="taskDesc" class="form-control" rows="3" placeholder="Chi tiết yêu cầu, phạm vi công việc..."></textarea>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Độ ưu tiên</label>
-            <select id="taskPriority" class="form-control">
-              <option value="Low">Thấp (Low)</option>
-              <option value="Medium" selected>Trung bình (Medium)</option>
-              <option value="High">Cao (High)</option>
-              <option value="Urgent">Khẩn cấp (Urgent)</option>
-            </select>
+    <!-- KANBAN BOARD -->
+    <div class="kanban-board" id="kanbanBoard">
+      <!-- TODO -->
+      <div class="kanban-col">
+        <div class="col-header">
+          <div class="col-header-top">
+            <div class="col-title"><span class="col-dot dot-todo"></span>Cần làm <span class="col-count-badge" id="cnt-TODO">0</span></div>
           </div>
-          <div class="form-group">
-            <label>Hạn chót (Due date)</label>
-            <input type="date" id="taskDueDate" class="form-control" />
-          </div>
+          <div class="col-progress-bar"><div class="col-progress-fill fill-todo" id="fill-TODO" style="width:0%"></div></div>
         </div>
-        <div class="form-group">
-          <label>Thuộc Dự Án</label>
-          <select id="taskProject" class="form-control">
-            <option value="">(Không gán dự án)</option>
-          </select>
+        <div class="col-body" id="col-TODO">
+          <div class="col-empty" id="empty-TODO"><div class="col-empty-icon">📋</div><div class="col-empty-text">Chưa có công việc</div></div>
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Lưu Công Việc</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal: Tạo Dự Án Mới -->
-  <div class="modal-backdrop" id="projectModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>📁 Tạo Không Gian Dự Án Mới</h3>
-        <button class="close-btn" onclick="closeModal('projectModal')">&times;</button>
       </div>
-      <form id="projectForm" onsubmit="handleCreateProject(event)">
-        <div class="form-group">
-          <label>Tên dự án *</label>
-          <input type="text" id="projName" class="form-control" placeholder="Ví dụ: Đồ án Điện toán Đám mây VKU..." required />
+      <!-- IN_PROGRESS -->
+      <div class="kanban-col">
+        <div class="col-header">
+          <div class="col-header-top">
+            <div class="col-title"><span class="col-dot dot-progress"></span>Đang làm <span class="col-count-badge" id="cnt-IN_PROGRESS">0</span></div>
+          </div>
+          <div class="col-progress-bar"><div class="col-progress-fill fill-progress" id="fill-IN_PROGRESS" style="width:0%"></div></div>
         </div>
-        <div class="form-group">
-          <label>Mục tiêu / Mô tả dự án</label>
-          <textarea id="projDesc" class="form-control" rows="2" placeholder="Mục tiêu của dự án..."></textarea>
+        <div class="col-body" id="col-IN_PROGRESS">
+          <div class="col-empty" id="empty-IN_PROGRESS"><div class="col-empty-icon">⚙️</div><div class="col-empty-text">Không có task đang chạy</div></div>
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Tạo Dự Án</button>
-      </form>
+      </div>
+      <!-- IN_REVIEW -->
+      <div class="kanban-col">
+        <div class="col-header">
+          <div class="col-header-top">
+            <div class="col-title"><span class="col-dot dot-review"></span>Chờ duyệt <span class="col-count-badge" id="cnt-IN_REVIEW">0</span></div>
+          </div>
+          <div class="col-progress-bar"><div class="col-progress-fill fill-review" id="fill-IN_REVIEW" style="width:0%"></div></div>
+        </div>
+        <div class="col-body" id="col-IN_REVIEW">
+          <div class="col-empty" id="empty-IN_REVIEW"><div class="col-empty-icon">🔍</div><div class="col-empty-text">Không có task chờ review</div></div>
+        </div>
+      </div>
+      <!-- DONE -->
+      <div class="kanban-col">
+        <div class="col-header">
+          <div class="col-header-top">
+            <div class="col-title"><span class="col-dot dot-done"></span>Hoàn tất <span class="col-count-badge" id="cnt-DONE">0</span></div>
+          </div>
+          <div class="col-progress-bar"><div class="col-progress-fill fill-done" id="fill-DONE" style="width:0%"></div></div>
+        </div>
+        <div class="col-body" id="col-DONE">
+          <div class="col-empty" id="empty-DONE"><div class="col-empty-icon">✅</div><div class="col-empty-text">Chưa hoàn tất công việc nào</div></div>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <!-- Modal: Đăng Nhập / Đăng Ký -->
-  <div class="modal-backdrop" id="authModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 id="authTitle">🔑 Đăng Nhập Hệ Thống</h3>
-        <button class="close-btn" onclick="closeModal('authModal')">&times;</button>
+  </main>
+</div>
+
+<!-- ===== MODAL: ĐĂNG NHẬP / ĐĂNG KÝ ===== -->
+<div class="modal-backdrop" id="authModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title-wrap"><span class="modal-icon">🔑</span><span class="modal-title">Tài khoản</span></div>
+      <button class="modal-close" onclick="closeModal('authModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="loginTab" onclick="setAuthMode('login')">Đăng nhập</button>
+        <button class="auth-tab" id="registerTab" onclick="setAuthMode('register')">Đăng ký</button>
       </div>
       <form id="authForm" onsubmit="handleAuthSubmit(event)">
-        <div class="form-group" id="nameGroup" style="display: none;">
-          <label>Họ và Tên *</label>
+        <div class="form-group" id="nameGroup" style="display:none">
+          <label class="form-label">Họ và Tên</label>
           <input type="text" id="authName" class="form-control" placeholder="Nguyễn Văn A" />
         </div>
         <div class="form-group">
-          <label>Địa chỉ Email *</label>
-          <input type="email" id="authEmail" class="form-control" placeholder="vku-student@vku.udn.vn" required />
+          <label class="form-label">Email</label>
+          <input type="email" id="authEmail" class="form-control" placeholder="student@vku.udn.vn" required />
         </div>
         <div class="form-group">
-          <label>Mật khẩu *</label>
-          <input type="password" id="authPassword" class="form-control" placeholder="******" required />
+          <label class="form-label">Mật khẩu</label>
+          <input type="password" id="authPassword" class="form-control" placeholder="Tối thiểu 6 ký tự" required />
         </div>
-        <button type="submit" class="btn btn-primary" id="authBtn" style="width: 100%;">Đăng Nhập</button>
-        <p style="text-align: center; margin-top: 14px; font-size: 13px; color: var(--muted);">
-          <span id="authToggleText">Chưa có tài khoản?</span>
-          <a href="javascript:void(0)" onclick="toggleAuthMode()" id="authToggleLink" style="color: var(--primary); font-weight: 600;">Đăng ký ngay</a>
-        </p>
+        <button type="submit" class="btn btn-primary" id="authSubmitBtn" style="width:100%; padding:11px; font-size:15px; margin-top:4px;">
+          <span id="authBtnLabel">Đăng nhập</span>
+        </button>
       </form>
     </div>
   </div>
+</div>
 
-  <!-- Modal: Upload Tệp Đính Kèm -->
-  <div class="modal-backdrop" id="uploadModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>📎 Đính Kèm Tệp Tin Lên Đám Mây</h3>
-        <button class="close-btn" onclick="closeModal('uploadModal')">&times;</button>
-      </div>
-      <form id="uploadForm" onsubmit="handleUploadSubmit(event)">
-        <input type="hidden" id="uploadTaskId" />
+<!-- ===== MODAL: TẠO DỰ ÁN ===== -->
+<div class="modal-backdrop" id="projectModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title-wrap"><span class="modal-icon">📁</span><span class="modal-title">Tạo dự án mới</span></div>
+      <button class="modal-close" onclick="closeModal('projectModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="projectForm" onsubmit="handleCreateProject(event)">
         <div class="form-group">
-          <label>Chọn tệp đính kèm (Hình ảnh, Tài liệu PDF/Word, tối đa 10MB)</label>
-          <input type="file" id="fileInput" class="form-control" required />
+          <label class="form-label">Tên dự án *</label>
+          <input type="text" id="projName" class="form-control" placeholder="Ví dụ: Đồ án Điện toán Đám mây VKU..." required />
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Tải Lên Lưu Trữ Cloud</button>
+        <div class="form-group">
+          <label class="form-label">Mô tả / Mục tiêu</label>
+          <textarea id="projDesc" class="form-control" placeholder="Mục tiêu của dự án, phạm vi công việc..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Tạo dự án</button>
       </form>
     </div>
   </div>
+</div>
 
-  <!-- Modal: Giám Sát Cloud (Observability) -->
-  <div class="modal-backdrop" id="healthModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>☁️ Thông Số Vận Hành Hệ Thống Đám Mây</h3>
-        <button class="close-btn" onclick="closeModal('healthModal')">&times;</button>
-      </div>
-      <div id="healthContent">
-        <p>Đang tải thông số thời gian thực...</p>
-      </div>
+<!-- ===== MODAL: THÊM / SỬA TASK ===== -->
+<div class="modal-backdrop" id="taskModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title-wrap"><span class="modal-icon" id="taskModalIcon">✚</span><span class="modal-title" id="taskModalTitle">Thêm Công Việc Mới</span></div>
+      <button class="modal-close" onclick="closeModal('taskModal')">✕</button>
     </div>
-  </div>
-
-  <script>
-    let currentUser = null;
-    let authToken = localStorage.getItem('vku_auth_token') || null;
-    let authMode = 'login'; // 'login' or 'register'
-    let currentTasks = [];
-    let projectsList = [];
-
-    // Khởi chạy ứng dụng
-    document.addEventListener('DOMContentLoaded', async () => {
-      checkLoginStatus();
-      await fetchProjects();
-      await loadTasks();
-      fetchHealthMetrics();
-    });
-
-    // Quản lý Modal
-    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-    function openTaskModal() { openModal('taskModal'); }
-    function openProjectModal() {
-      if (!authToken) {
-        alert('Vui lòng đăng nhập trước khi tạo dự án!');
-        return openAuthModal();
-      }
-      openModal('projectModal');
-    }
-    function openAuthModal() { openModal('authModal'); }
-
-    // Toggle chế độ Auth
-    function toggleAuthMode() {
-      authMode = authMode === 'login' ? 'register' : 'login';
-      const nameGroup = document.getElementById('nameGroup');
-      const authTitle = document.getElementById('authTitle');
-      const authBtn = document.getElementById('authBtn');
-      const authToggleText = document.getElementById('authToggleText');
-      const authToggleLink = document.getElementById('authToggleLink');
-
-      if (authMode === 'register') {
-        nameGroup.style.display = 'block';
-        authTitle.innerText = '📝 Đăng Ký Tài Khoản Mới';
-        authBtn.innerText = 'Đăng Ký';
-        authToggleText.innerText = 'Đã có tài khoản?';
-        authToggleLink.innerText = 'Đăng nhập';
-      } else {
-        nameGroup.style.display = 'none';
-        authTitle.innerText = '🔑 Đăng Nhập Hệ Thống';
-        authBtn.innerText = 'Đăng Nhập';
-        authToggleText.innerText = 'Chưa có tài khoản?';
-        authToggleLink.innerText = 'Đăng ký ngay';
-      }
-    }
-
-    // Kiểm tra trạng thái đăng nhập
-    async function checkLoginStatus() {
-      if (!authToken) {
-        renderAuthUI(null);
-        return;
-      }
-      try {
-        const res = await fetch('/api/auth/me', {
-          headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        if (res.ok) {
-          currentUser = await res.json();
-          renderAuthUI(currentUser);
-        } else {
-          logout();
-        }
-      } catch (err) {
-        logout();
-      }
-    }
-
-    function renderAuthUI(user) {
-      const sec = document.getElementById('userSection');
-      if (user) {
-        sec.innerHTML = `
-          <span style="font-size: 13px; font-weight: 600; color: #334155;">👤 ${user.name} (${user.role})</span>
-          <button class="btn btn-outline" onclick="logout()">Đăng Xuất</button>
-        `;
-      } else {
-        sec.innerHTML = `<button class="btn btn-primary" onclick="openAuthModal()">🔑 Đăng Nhập / Đăng Ký</button>`;
-      }
-    }
-
-    function logout() {
-      localStorage.removeItem('vku_auth_token');
-      authToken = null;
-      currentUser = null;
-      renderAuthUI(null);
-      fetchProjects();
-    }
-
-    // Xử lý Auth Submit
-    async function handleAuthSubmit(e) {
-      e.preventDefault();
-      const email = document.getElementById('authEmail').value;
-      const password = document.getElementById('authPassword').value;
-      const name = document.getElementById('authName').value;
-
-      const endpoint = authMode === 'login' ? '/api/auth/login' : '/api/auth/register';
-      const payload = authMode === 'login' ? { email, password } : { name, email, password };
-
-      try {
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Thao tác thất bại');
-
-        localStorage.setItem('vku_auth_token', data.token);
-        authToken = data.token;
-        currentUser = data.user;
-        renderAuthUI(currentUser);
-        closeModal('authModal');
-        await fetchProjects();
-        await loadTasks();
-        alert(data.message || 'Thành công!');
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
-    // Tải danh sách Dự án
-    async function fetchProjects() {
-      const select = document.getElementById('projectSelect');
-      const taskSelect = document.getElementById('taskProject');
-      if (!authToken) {
-        select.innerHTML = '<option value="">-- Tất cả công việc --</option>';
-        taskSelect.innerHTML = '<option value="">(Không gán dự án)</option>';
-        return;
-      }
-      try {
-        const res = await fetch('/api/projects', {
-          headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        if (res.ok) {
-          const resData = await res.json();
-          projectsList = resData.data || [];
-          
-          let optionsHtml = '<option value="">-- Tất cả công việc --</option>';
-          let taskOptionsHtml = '<option value="">(Không gán dự án)</option>';
-
-          projectsList.forEach(p => {
-            optionsHtml += `<option value="${p._id}">${p.name}</option>`;
-            taskOptionsHtml += `<option value="${p._id}">${p.name}</option>`;
-          });
-
-          select.innerHTML = optionsHtml;
-          taskSelect.innerHTML = taskOptionsHtml;
-        }
-      } catch (e) {
-        console.warn('Lỗi tải danh sách dự án:', e);
-      }
-    }
-
-    // Xử lý tạo dự án mới
-    async function handleCreateProject(e) {
-      e.preventDefault();
-      const name = document.getElementById('projName').value;
-      const description = document.getElementById('projDesc').value;
-
-      try {
-        const res = await fetch('/api/projects', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authToken}`
-          },
-          body: JSON.stringify({ name, description })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-
-        closeModal('projectModal');
-        document.getElementById('projectForm').reset();
-        await fetchProjects();
-        alert('Tạo dự án mới thành công!');
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
-    // Tải danh sách công việc (Kanban)
-    async function loadTasks() {
-      const projectId = document.getElementById('projectSelect').value;
-      let url = '/api/tasks';
-      if (projectId) url += `?projectId=${projectId}`;
-
-      try {
-        const headers = {};
-        if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
-
-        const res = await fetch(url, { headers });
-        const resJson = await res.json();
-        currentTasks = resJson.data || [];
-        renderKanban(currentTasks);
-      } catch (err) {
-        console.error('Lỗi tải công việc:', err);
-      }
-    }
-
-    // Hiển thị giao diện Kanban
-    function renderKanban(tasks) {
-      const cols = {
-        TODO: document.getElementById('col-list-TODO'),
-        IN_PROGRESS: document.getElementById('col-list-IN_PROGRESS'),
-        IN_REVIEW: document.getElementById('col-list-IN_REVIEW'),
-        DONE: document.getElementById('col-list-DONE')
-      };
-
-      const counts = { TODO: 0, IN_PROGRESS: 0, IN_REVIEW: 0, DONE: 0 };
-      Object.values(cols).forEach(col => col.innerHTML = '');
-
-      tasks.forEach(task => {
-        const status = task.status || (task.completed ? 'DONE' : 'TODO');
-        counts[status] = (counts[status] || 0) + 1;
-
-        const card = document.createElement('div');
-        card.className = 'task-card';
-
-        let attachmentsHtml = '';
-        if (task.attachments && task.attachments.length > 0) {
-          attachmentsHtml = `<div class="task-attachments">
-            📎 <b>Tệp (${task.attachments.length}):</b><br/>
-            ${task.attachments.map(att => `<a class="attachment-item" href="${att.fileUrl}" target="_blank">📄 ${att.fileName}</a>`).join('')}
-          </div>`;
-        }
-
-        card.innerHTML = `
-          <div class="task-card-title">${escapeHtml(task.title)}</div>
-          <div class="task-card-desc">${escapeHtml(task.description || 'Chưa có mô tả')}</div>
-          <div>
-            <span class="prio-badge prio-${task.priority}">${task.priority}</span>
-            ${task.dueDate ? `<span style="font-size: 11px; color: var(--muted); margin-left: 6px;">📅 ${task.dueDate}</span>` : ''}
-          </div>
-          ${attachmentsHtml}
-          <div class="card-actions">
-            <select class="status-select" onchange="changeTaskStatus('${task._id}', this.value)">
-              <option value="TODO" ${status === 'TODO' ? 'selected' : ''}>📋 Cần làm</option>
-              <option value="IN_PROGRESS" ${status === 'IN_PROGRESS' ? 'selected' : ''}>⚙️ Đang làm</option>
-              <option value="IN_REVIEW" ${status === 'IN_REVIEW' ? 'selected' : ''}>🔍 Chờ duyệt</option>
-              <option value="DONE" ${status === 'DONE' ? 'selected' : ''}>✅ Đã xong</option>
+    <div class="modal-body">
+      <form id="taskForm" onsubmit="handleTaskSubmit(event)">
+        <input type="hidden" id="editTaskId" />
+        <div class="form-group">
+          <label class="form-label">Tiêu đề công việc *</label>
+          <input type="text" id="taskTitle" class="form-control" placeholder="Mô tả ngắn gọn công việc cần làm..." required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mô tả chi tiết</label>
+          <textarea id="taskDesc" class="form-control" rows="3" placeholder="Yêu cầu, phạm vi, kết quả mong đợi..."></textarea>
+        </div>
+        <div class="form-row-3">
+          <div class="form-group">
+            <label class="form-label">Độ ưu tiên</label>
+            <select id="taskPriority" class="form-control">
+              <option value="Low">🔵 Thấp</option>
+              <option value="Medium" selected>🟡 Trung bình</option>
+              <option value="High">🟠 Cao</option>
+              <option value="Urgent">🔴 Khẩn cấp</option>
             </select>
-            <div style="display: flex; gap: 4px;">
-              <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="openUploadModal('${task._id}')" title="Đính kèm tệp">📎</button>
-              <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteTask('${task._id}')" title="Xóa">🗑️</button>
-            </div>
           </div>
-        `;
+          <div class="form-group">
+            <label class="form-label">Trạng thái</label>
+            <select id="taskStatus" class="form-control">
+              <option value="TODO">📋 Cần làm</option>
+              <option value="IN_PROGRESS">⚙️ Đang làm</option>
+              <option value="IN_REVIEW">🔍 Chờ duyệt</option>
+              <option value="DONE">✅ Hoàn tất</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hạn chót</label>
+            <input type="date" id="taskDueDate" class="form-control" />
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Thuộc dự án</label>
+            <select id="taskProject" class="form-control">
+              <option value="">(Không gán dự án)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phân công cho</label>
+            <select id="taskAssignee" class="form-control">
+              <option value="">(Chưa phân công)</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('taskModal')">Hủy</button>
+      <button class="btn btn-primary" onclick="document.getElementById('taskForm').requestSubmit()" id="taskSubmitBtn">Lưu công việc</button>
+    </div>
+  </div>
+</div>
 
-        if (cols[status]) cols[status].appendChild(card);
+<!-- ===== MODAL: UPLOAD ===== -->
+<div class="modal-backdrop" id="uploadModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title-wrap"><span class="modal-icon">📎</span><span class="modal-title">Đính kèm tệp tin</span></div>
+      <button class="modal-close" onclick="closeModal('uploadModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="uploadTaskId" />
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div class="drop-zone-icon">☁️</div>
+        <p>Kéo thả tệp vào đây hoặc nhấn để chọn</p>
+        <small>PDF, Word, Excel, Hình ảnh — Tối đa 10MB</small>
+      </div>
+      <input type="file" id="fileInput" style="display:none" onchange="handleFileSelected(this)" />
+      <div id="selectedFileInfo" style="margin-top:12px; display:none;">
+        <div style="display:flex; align-items:center; gap:10px; padding:12px; background:var(--primary-bg); border-radius:8px; border:1px solid var(--primary-light);">
+          <span style="font-size:22px">📄</span>
+          <div style="flex:1; min-width:0;">
+            <div id="selectedFileName" style="font-size:13px; font-weight:600; color:var(--primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"></div>
+            <div id="selectedFileSize" style="font-size:11px; color:var(--text-muted);"></div>
+          </div>
+          <button onclick="clearSelectedFile()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;">✕</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('uploadModal')">Hủy</button>
+      <button class="btn btn-primary" id="uploadSubmitBtn" onclick="handleUploadSubmit()" disabled>Tải lên Cloud</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: CLOUD MONITORING ===== -->
+<div class="modal-backdrop" id="healthModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title-wrap"><span class="modal-icon">📡</span><span class="modal-title">Giám Sát Hệ Thống Đám Mây</span></div>
+      <button class="modal-close" onclick="closeModal('healthModal')">✕</button>
+    </div>
+    <div class="modal-body" id="healthContent">
+      <div style="text-align:center; padding:40px; color:var(--text-muted);">
+        <div class="spinner" style="width:28px; height:28px; border-color:rgba(99,102,241,0.2); border-top-color:var(--primary); margin:0 auto 12px;"></div>
+        <div>Đang tải dữ liệu Cloud Observability...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CONFIRM DIALOG ===== -->
+<div class="modal-backdrop" id="confirmModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title-wrap"><span class="modal-icon">⚠️</span><span class="modal-title" id="confirmTitle">Xác nhận</span></div>
+      <button class="modal-close" onclick="closeModal('confirmModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmMessage" style="color:var(--text-secondary); font-size:14px; line-height:1.6;"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('confirmModal')">Hủy bỏ</button>
+      <button class="btn btn-danger-soft" id="confirmOkBtn">Xác nhận xóa</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =============================================
+//  STATE
+// =============================================
+let currentUser = null;
+let authToken   = localStorage.getItem('vku_auth_token') || null;
+let authMode    = 'login';
+let allTasks    = [];
+let projectsList = [];
+let usersList   = [];
+let currentProjectFilter = '';
+let currentPrioFilter    = 'all';
+let searchQuery          = '';
+let selectedFile         = null;
+const PROJ_COLORS = ['#6366f1','#10b981','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
+
+// =============================================
+//  INIT
+// =============================================
+document.addEventListener('DOMContentLoaded', async () => {
+  applyTheme();
+  await checkLoginStatus();
+  await fetchProjects();
+  await loadTasks();
+  fetchHealthQuiet();
+  if (window.innerWidth <= 768) {
+    document.getElementById('mobileMenuBtn').style.display = 'flex';
+  }
+});
+
+// =============================================
+//  THEME
+// =============================================
+function applyTheme() {
+  const saved = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.getElementById('themeToggle').textContent = saved === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+}
+
+// =============================================
+//  TOAST
+// =============================================
+function toast(message, type = 'info') {
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  const el = document.createElement('div');
+  el.className = `toast toast-${type}`;
+  el.innerHTML = `<span class="toast-icon">${icons[type]}</span><span>${message}</span>`;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+// =============================================
+//  CONFIRM DIALOG
+// =============================================
+function showConfirm(title, message, onOk) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMessage').textContent = message;
+  const btn = document.getElementById('confirmOkBtn');
+  btn.onclick = () => { closeModal('confirmModal'); onOk(); };
+  openModal('confirmModal');
+}
+
+// =============================================
+//  MODAL HELPERS
+// =============================================
+function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+// Close on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(bd => {
+  bd.addEventListener('click', e => { if (e.target === bd) closeModal(bd.id); });
+});
+
+// =============================================
+//  AUTH
+// =============================================
+async function checkLoginStatus() {
+  if (!authToken) { renderAuthUI(null); return; }
+  try {
+    const res = await fetch('/api/auth/me', { headers: { Authorization: `Bearer ${authToken}` } });
+    if (res.ok) {
+      currentUser = await res.json();
+      renderAuthUI(currentUser);
+      await fetchUsers();
+    } else { logout(false); }
+  } catch { logout(false); }
+}
+
+function renderAuthUI(user) {
+  const topbar = document.getElementById('topbarUserArea');
+  const sidebarName = document.getElementById('sidebarUserName');
+  const sidebarRole = document.getElementById('sidebarUserRole');
+  const sidebarAvatar = document.getElementById('sidebarAvatarIcon');
+  const sidebarCard = document.getElementById('sidebarUserCard');
+
+  if (user) {
+    const initials = user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    topbar.innerHTML = `
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="user-avatar" style="width:34px; height:34px; font-size:14px;">${initials}</div>
+        <span style="font-size:13px; font-weight:600; color:var(--text);">${user.name}</span>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Đăng xuất</button>
+      </div>`;
+    sidebarName.textContent = user.name;
+    sidebarRole.textContent = user.role === 'admin' ? 'Quản trị viên' : 'Thành viên';
+    sidebarAvatar.textContent = initials;
+    sidebarCard.onclick = () => {};
+  } else {
+    topbar.innerHTML = `<button class="btn btn-primary" onclick="openAuthModal()">🔑 Đăng Nhập</button>`;
+    sidebarName.textContent = 'Chưa đăng nhập';
+    sidebarRole.textContent = 'Nhấn để đăng nhập';
+    sidebarAvatar.textContent = '?';
+    sidebarCard.onclick = openAuthModal;
+  }
+}
+
+function logout(showToast = true) {
+  localStorage.removeItem('vku_auth_token');
+  authToken = null; currentUser = null; usersList = [];
+  renderAuthUI(null);
+  if (showToast) toast('Đã đăng xuất thành công', 'info');
+  fetchProjects();
+  loadTasks();
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  document.getElementById('loginTab').classList.toggle('active', mode === 'login');
+  document.getElementById('registerTab').classList.toggle('active', mode === 'register');
+  document.getElementById('nameGroup').style.display = mode === 'register' ? 'block' : 'none';
+  document.getElementById('authBtnLabel').textContent = mode === 'login' ? 'Đăng nhập' : 'Đăng ký tài khoản';
+}
+
+function openAuthModal() { setAuthMode('login'); openModal('authModal'); }
+
+async function handleAuthSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById('authSubmitBtn');
+  const label = document.getElementById('authBtnLabel');
+  btn.disabled = true;
+  const originalText = label.textContent;
+  label.innerHTML = '<div class="spinner"></div>';
+
+  const email = document.getElementById('authEmail').value;
+  const password = document.getElementById('authPassword').value;
+  const name = document.getElementById('authName').value;
+  const endpoint = authMode === 'login' ? '/api/auth/login' : '/api/auth/register';
+  const payload = authMode === 'login' ? { email, password } : { name, email, password };
+
+  try {
+    const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Thao tác thất bại');
+    localStorage.setItem('vku_auth_token', data.token);
+    authToken = data.token; currentUser = data.user;
+    renderAuthUI(currentUser);
+    closeModal('authModal');
+    document.getElementById('authForm').reset();
+    toast(authMode === 'login' ? `Chào mừng ${data.user.name}! 👋` : 'Đăng ký tài khoản thành công!', 'success');
+    await fetchUsers();
+    await fetchProjects();
+    await loadTasks();
+  } catch (err) {
+    toast(err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    label.textContent = originalText;
+  }
+}
+
+// =============================================
+//  USERS
+// =============================================
+async function fetchUsers() {
+  if (!authToken) return;
+  try {
+    const res = await fetch('/api/auth/users', { headers: { Authorization: `Bearer ${authToken}` } });
+    if (res.ok) usersList = await res.json();
+    updateAssigneeSelect();
+  } catch {}
+}
+
+function updateAssigneeSelect() {
+  const sel = document.getElementById('taskAssignee');
+  sel.innerHTML = '<option value="">(Chưa phân công)</option>';
+  usersList.forEach(u => sel.innerHTML += `<option value="${u._id}">${u.name} — ${u.email}</option>`);
+}
+
+// =============================================
+//  PROJECTS
+// =============================================
+function getProjectColor(index) { return PROJ_COLORS[index % PROJ_COLORS.length]; }
+
+async function fetchProjects() {
+  const toolbar = document.getElementById('sidebarProjects');
+  const taskSelect = document.getElementById('taskProject');
+  taskSelect.innerHTML = '<option value="">(Không gán dự án)</option>';
+
+  if (!authToken) {
+    toolbar.innerHTML = '<div style="font-size:12px; color:rgba(255,255,255,0.3); padding:6px 10px;">Đăng nhập để xem dự án</div>';
+    currentProjectFilter = '';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/projects', { headers: { Authorization: `Bearer ${authToken}` } });
+    if (res.ok) {
+      const data = await res.json();
+      projectsList = data.data || [];
+      renderSidebarProjects();
+      projectsList.forEach((p, i) => {
+        taskSelect.innerHTML += `<option value="${p._id}">${p.name}</option>`;
       });
-
-      // Cập nhật số đếm trên Header cột
-      document.getElementById('count-TODO').innerText = counts.TODO;
-      document.getElementById('count-IN_PROGRESS').innerText = counts.IN_PROGRESS;
-      document.getElementById('count-IN_REVIEW').innerText = counts.IN_REVIEW;
-      document.getElementById('count-DONE').innerText = counts.DONE;
-
-      // Cập nhật Stats tổng quan
-      const total = tasks.length;
-      document.getElementById('totalTasksCount').innerText = total;
-      document.getElementById('inProgressTasksCount').innerText = counts.IN_PROGRESS;
-      document.getElementById('doneTasksCount').innerText = counts.DONE;
-
-      const pct = total === 0 ? 0 : Math.round((counts.DONE / total) * 100);
-      document.getElementById('progressPercentage').innerText = `${pct}%`;
     }
+  } catch {}
+}
 
-    // Xử lý tạo Task
-    async function handleCreateTask(e) {
-      e.preventDefault();
-      const title = document.getElementById('taskTitle').value;
-      const description = document.getElementById('taskDesc').value;
-      const priority = document.getElementById('taskPriority').value;
-      const dueDate = document.getElementById('taskDueDate').value;
-      const projectId = document.getElementById('taskProject').value || null;
+function renderSidebarProjects() {
+  const container = document.getElementById('sidebarProjects');
+  if (projectsList.length === 0) {
+    container.innerHTML = '<div style="font-size:12px; color:rgba(255,255,255,0.3); padding:6px 10px;">Chưa có dự án nào</div>';
+    return;
+  }
+  container.innerHTML = projectsList.map((p, i) => `
+    <div class="sidebar-proj-item ${currentProjectFilter === p._id ? 'active' : ''}" onclick="setProjectFilter('${p._id}', '${escHtml(p.name)}')">
+      <span class="proj-dot" style="background:${getProjectColor(i)}"></span>
+      <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escHtml(p.name)}</span>
+    </div>
+  `).join('') + `
+    <div class="sidebar-proj-item ${currentProjectFilter === '' ? 'active' : ''}" onclick="setProjectFilter('', 'Tất cả công việc')" style="margin-top:4px;">
+      <span class="proj-dot" style="background:#94a3b8"></span>
+      <span>Tất cả</span>
+    </div>`;
+}
 
-      try {
-        const headers = { 'Content-Type': 'application/json' };
-        if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+function setProjectFilter(projectId, name) {
+  currentProjectFilter = projectId;
+  document.getElementById('pageTitle').textContent = name || 'Tất cả công việc';
+  renderSidebarProjects();
+  loadTasks();
+}
 
-        const res = await fetch('/api/tasks', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ title, description, priority, dueDate, projectId, status: 'TODO' })
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
+async function openProjectModal() {
+  if (!authToken) { toast('Vui lòng đăng nhập trước', 'error'); openAuthModal(); return; }
+  openModal('projectModal');
+}
 
-        closeModal('taskModal');
-        document.getElementById('taskForm').reset();
-        await loadTasks();
-      } catch (err) {
-        alert(err.message);
-      }
+async function handleCreateProject(e) {
+  e.preventDefault();
+  const name = document.getElementById('projName').value;
+  const description = document.getElementById('projDesc').value;
+  try {
+    const res = await fetch('/api/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ name, description })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    closeModal('projectModal');
+    document.getElementById('projectForm').reset();
+    toast(`Đã tạo dự án "${name}" thành công!`, 'success');
+    await fetchProjects();
+  } catch (err) { toast(err.message, 'error'); }
+}
+
+// =============================================
+//  TASKS
+// =============================================
+async function loadTasks() {
+  let url = '/api/tasks';
+  if (currentProjectFilter) url += `?projectId=${currentProjectFilter}`;
+  try {
+    const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+    const res = await fetch(url, { headers });
+    const json = await res.json();
+    allTasks = json.data || [];
+    renderKanban();
+    updateStats();
+  } catch (err) { toast('Không thể tải danh sách công việc', 'error'); }
+}
+
+function getFilteredTasks() {
+  return allTasks.filter(t => {
+    const matchSearch = !searchQuery || t.title.toLowerCase().includes(searchQuery) || (t.description || '').toLowerCase().includes(searchQuery);
+    const matchPrio   = currentPrioFilter === 'all' || t.priority === currentPrioFilter;
+    return matchSearch && matchPrio;
+  });
+}
+
+function filterBoard() {
+  searchQuery = document.getElementById('searchInput').value.toLowerCase();
+  renderKanban();
+}
+
+function setPrioFilter(prio, el) {
+  currentPrioFilter = prio;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderKanban();
+}
+
+function renderKanban() {
+  const statuses = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE'];
+  const tasks = getFilteredTasks();
+  const counts = { TODO: 0, IN_PROGRESS: 0, IN_REVIEW: 0, DONE: 0 };
+
+  statuses.forEach(s => {
+    document.getElementById(`col-${s}`).innerHTML = '';
+    document.getElementById(`empty-${s}`).style.display = 'none';
+  });
+
+  tasks.forEach(task => {
+    const status = task.status || (task.completed ? 'DONE' : 'TODO');
+    if (!counts[status] !== undefined) counts[status] = (counts[status] || 0) + 1;
+    else counts[status] = 1;
+    if (statuses.includes(status)) {
+      const card = createTaskCard(task, status);
+      document.getElementById(`col-${status}`).appendChild(card);
     }
+  });
 
-    // Đổi trạng thái Task
-    async function changeTaskStatus(id, newStatus) {
-      try {
-        const headers = { 'Content-Type': 'application/json' };
-        if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
-
-        const res = await fetch(`/api/tasks/${id}`, {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify({ status: newStatus })
-        });
-        if (!res.ok) throw new Error('Không thể cập nhật trạng thái');
-        await loadTasks();
-      } catch (err) {
-        alert(err.message);
-      }
+  const total = tasks.length;
+  statuses.forEach(s => {
+    const cnt = counts[s] || 0;
+    document.getElementById(`cnt-${s}`).textContent = cnt;
+    document.getElementById(`fill-${s}`).style.width = total ? `${(cnt / total) * 100}%` : '0%';
+    if (cnt === 0) {
+      document.getElementById(`empty-${s}`).style.display = 'flex';
     }
+  });
+}
 
-    // Xóa Task
-    async function deleteTask(id) {
-      if (!confirm('Bạn có chắc chắn muốn xóa công việc này?')) return;
-      try {
-        const headers = {};
-        if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+function createTaskCard(task, status) {
+  const card = document.createElement('div');
+  card.className = 'task-card';
 
-        const res = await fetch(`/api/tasks/${id}`, {
-          method: 'DELETE',
-          headers
-        });
-        if (!res.ok) throw new Error('Xóa thất bại');
-        await loadTasks();
-      } catch (err) {
-        alert(err.message);
-      }
+  const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && status !== 'DONE';
+  const dueBadge = task.dueDate
+    ? `<span class="due-tag ${isOverdue ? 'overdue' : ''}">📅 ${task.dueDate}</span>`
+    : '';
+
+  const assigneeHtml = task.assignee
+    ? `<div class="task-assignee">
+        <div class="avatar-xs">${(task.assignee.name || 'U').charAt(0).toUpperCase()}</div>
+        <span>${escHtml(task.assignee.name || task.assignee.email)}</span>
+      </div>`
+    : `<div class="task-assignee" style="color:var(--text-muted)">Chưa phân công</div>`;
+
+  const attachHtml = (task.attachments || []).length > 0
+    ? `<div class="attach-row">${task.attachments.map(a =>
+        `<a class="attach-chip" href="${a.fileUrl}" target="_blank">📎 ${escHtml(a.fileName)}</a>`
+      ).join('')}</div>`
+    : '';
+
+  card.innerHTML = `
+    <div class="task-card-header">
+      <div class="task-title ${status === 'DONE' ? 'done' : ''}">${escHtml(task.title)}</div>
+    </div>
+    ${task.description ? `<div class="task-desc">${escHtml(task.description)}</div>` : ''}
+    <div class="task-tags">
+      <span class="prio-badge prio-${task.priority}">${task.priority}</span>
+      ${dueBadge}
+    </div>
+    ${attachHtml}
+    <div class="task-footer">
+      ${assigneeHtml}
+      <div class="task-actions-row">
+        <button class="task-action-btn" onclick="openEditTaskModal(event, '${task._id}')" title="Chỉnh sửa">✏️</button>
+        <button class="task-action-btn" onclick="openUploadModal(event, '${task._id}')" title="Đính kèm tệp">📎</button>
+        <button class="task-action-btn del" onclick="confirmDeleteTask(event, '${task._id}', '${escHtml(task.title)}')" title="Xóa task">🗑️</button>
+      </div>
+    </div>`;
+
+  // Click card to edit (not on button clicks)
+  card.addEventListener('click', (e) => {
+    if (e.target.classList.contains('task-action-btn') || e.target.closest('.task-action-btn') || e.target.closest('a')) return;
+    openEditTaskModal(e, task._id);
+  });
+
+  return card;
+}
+
+function updateStats() {
+  const tasks = allTasks;
+  const total = tasks.length;
+  const done  = tasks.filter(t => t.status === 'DONE').length;
+  const prog  = tasks.filter(t => t.status === 'IN_PROGRESS').length;
+  const pct   = total ? Math.round((done / total) * 100) : 0;
+  const progPct = total ? Math.round((prog / total) * 100) : 0;
+
+  document.getElementById('statTotal').textContent   = total;
+  document.getElementById('statProgress').textContent = prog;
+  document.getElementById('statDone').textContent    = done;
+  document.getElementById('statPct').textContent     = `${pct}%`;
+  document.getElementById('progTotal').style.width   = '100%';
+  document.getElementById('progProgress').style.width = `${progPct}%`;
+  document.getElementById('progDone').style.width    = `${pct}%`;
+  document.getElementById('progOverall').style.width = `${pct}%`;
+  document.getElementById('progRateText').textContent = `${progPct}%`;
+  document.getElementById('doneRateText').textContent = `${pct}%`;
+}
+
+// =============================================
+//  TASK MODAL (CREATE / EDIT)
+// =============================================
+function openTaskModal() {
+  document.getElementById('editTaskId').value = '';
+  document.getElementById('taskModalIcon').textContent = '✚';
+  document.getElementById('taskModalTitle').textContent = 'Thêm Công Việc Mới';
+  document.getElementById('taskForm').reset();
+  document.getElementById('taskSubmitBtn').textContent = 'Lưu công việc';
+  openModal('taskModal');
+}
+
+function openEditTaskModal(e, taskId) {
+  e.stopPropagation();
+  const task = allTasks.find(t => t._id === taskId);
+  if (!task) return;
+
+  document.getElementById('editTaskId').value     = task._id;
+  document.getElementById('taskModalIcon').textContent = '✏️';
+  document.getElementById('taskModalTitle').textContent = 'Chỉnh Sửa Công Việc';
+  document.getElementById('taskTitle').value      = task.title;
+  document.getElementById('taskDesc').value       = task.description || '';
+  document.getElementById('taskPriority').value   = task.priority || 'Medium';
+  document.getElementById('taskStatus').value     = task.status || 'TODO';
+  document.getElementById('taskDueDate').value    = task.dueDate || '';
+  document.getElementById('taskProject').value    = task.project || '';
+  document.getElementById('taskAssignee').value   = task.assignee ? (task.assignee._id || task.assignee) : '';
+  document.getElementById('taskSubmitBtn').textContent = 'Cập nhật';
+  openModal('taskModal');
+}
+
+async function handleTaskSubmit(e) {
+  e.preventDefault();
+  const id    = document.getElementById('editTaskId').value;
+  const isEdit = !!id;
+  const btn   = document.getElementById('taskSubmitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div>';
+
+  const payload = {
+    title:       document.getElementById('taskTitle').value,
+    description: document.getElementById('taskDesc').value,
+    priority:    document.getElementById('taskPriority').value,
+    status:      document.getElementById('taskStatus').value,
+    dueDate:     document.getElementById('taskDueDate').value,
+    projectId:   document.getElementById('taskProject').value || null,
+    assigneeId:  document.getElementById('taskAssignee').value || null,
+  };
+
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (authToken) headers.Authorization = `Bearer ${authToken}`;
+
+    const res = await fetch(isEdit ? `/api/tasks/${id}` : '/api/tasks', {
+      method: isEdit ? 'PUT' : 'POST',
+      headers,
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+
+    closeModal('taskModal');
+    toast(isEdit ? 'Đã cập nhật công việc!' : 'Đã thêm công việc mới!', 'success');
+    await loadTasks();
+  } catch (err) {
+    toast(err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = isEdit ? 'Cập nhật' : 'Lưu công việc';
+  }
+}
+
+function confirmDeleteTask(e, id, title) {
+  e.stopPropagation();
+  showConfirm('Xóa công việc', `Bạn có chắc muốn xóa công việc "${title}"? Hành động này không thể hoàn tác.`, async () => {
+    try {
+      const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+      const res = await fetch(`/api/tasks/${id}`, { method: 'DELETE', headers });
+      if (!res.ok) throw new Error('Xóa thất bại');
+      toast('Đã xóa công việc!', 'success');
+      await loadTasks();
+    } catch (err) { toast(err.message, 'error'); }
+  });
+}
+
+// =============================================
+//  UPLOAD
+// =============================================
+function openUploadModal(e, taskId) {
+  e.stopPropagation();
+  document.getElementById('uploadTaskId').value = taskId;
+  clearSelectedFile();
+  openModal('uploadModal');
+}
+
+function handleFileSelected(input) {
+  const file = input.files[0];
+  if (!file) return;
+  selectedFile = file;
+  document.getElementById('selectedFileInfo').style.display = 'block';
+  document.getElementById('selectedFileName').textContent = file.name;
+  document.getElementById('selectedFileSize').textContent = `${(file.size / 1024).toFixed(1)} KB`;
+  document.getElementById('uploadSubmitBtn').disabled = false;
+  const dz = document.getElementById('dropZone');
+  dz.innerHTML = `<div style="font-size:28px">✅</div><p style="color:var(--success)">Đã chọn: ${escHtml(file.name)}</p>`;
+}
+
+function clearSelectedFile() {
+  selectedFile = null;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('selectedFileInfo').style.display = 'none';
+  document.getElementById('uploadSubmitBtn').disabled = true;
+  document.getElementById('dropZone').innerHTML = `
+    <div class="drop-zone-icon">☁️</div>
+    <p>Kéo thả tệp vào đây hoặc nhấn để chọn</p>
+    <small>PDF, Word, Excel, Hình ảnh — Tối đa 10MB</small>`;
+}
+
+// Drag & drop
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) { document.getElementById('fileInput').files = e.dataTransfer.files; handleFileSelected(document.getElementById('fileInput')); }
+});
+
+async function handleUploadSubmit() {
+  const taskId = document.getElementById('uploadTaskId').value;
+  if (!selectedFile || !taskId) return;
+
+  const btn = document.getElementById('uploadSubmitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Đang tải lên...';
+
+  const formData = new FormData();
+  formData.append('file', selectedFile);
+
+  try {
+    const res = await fetch(`/api/tasks/${taskId}/attachments`, { method: 'POST', body: formData });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    closeModal('uploadModal');
+    toast('Tải lên tệp đính kèm thành công!', 'success');
+    await loadTasks();
+  } catch (err) {
+    toast(err.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Tải lên Cloud';
+  }
+}
+
+// =============================================
+//  EXCEL EXPORT
+// =============================================
+async function exportExcelReport() {
+  let url = '/api/tasks/actions/export';
+  if (currentProjectFilter) url += `?projectId=${currentProjectFilter}`;
+  toast('Đang tạo file báo cáo Excel...', 'info');
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    window.open(data.downloadUrl, '_blank');
+    toast('Xuất báo cáo Excel thành công!', 'success');
+  } catch (err) { toast(err.message, 'error'); }
+}
+
+// =============================================
+//  HEALTH / OBSERVABILITY
+// =============================================
+async function fetchHealthQuiet() {
+  try {
+    const res = await fetch('/api/health');
+    if (res.ok) {
+      const d = await res.json();
+      document.getElementById('cloudPillText').textContent = `${d.cloudEnvironment.provider} · Uptime ${formatUptime(d.uptimeSeconds)}`;
     }
+  } catch {}
+}
 
-    // Upload tệp đính kèm
-    function openUploadModal(taskId) {
-      document.getElementById('uploadTaskId').value = taskId;
-      openModal('uploadModal');
-    }
+function formatUptime(s) {
+  if (s < 60) return `${s}s`;
+  if (s < 3600) return `${Math.floor(s/60)}m`;
+  return `${Math.floor(s/3600)}h ${Math.floor((s%3600)/60)}m`;
+}
 
-    async function handleUploadSubmit(e) {
-      e.preventDefault();
-      const taskId = document.getElementById('uploadTaskId').value;
-      const fileInput = document.getElementById('fileInput');
-      if (!fileInput.files[0]) return;
+async function openHealthModal() {
+  openModal('healthModal');
+  document.getElementById('healthContent').innerHTML = `
+    <div style="text-align:center; padding:40px; color:var(--text-muted);">
+      <div class="spinner" style="width:28px; height:28px; border-color:rgba(99,102,241,0.2); border-top-color:var(--primary); margin:0 auto 12px;"></div>
+      <div>Đang tải dữ liệu Cloud Observability...</div>
+    </div>`;
+  try {
+    const res = await fetch('/api/health');
+    const d   = await res.json();
+    const statusDot = (s) => {
+      if (s === 'Connected') return '<span class="status-dot"><span class="dot dot-green"></span> Đang kết nối</span>';
+      if (s.includes('Fallback')) return '<span class="status-dot"><span class="dot dot-yellow"></span> Chế độ Fallback</span>';
+      if (s.includes('Active')) return '<span class="status-dot"><span class="dot dot-green"></span> Đang hoạt động</span>';
+      return '<span class="status-dot"><span class="dot dot-red"></span> ' + s + '</span>';
+    };
+    document.getElementById('healthContent').innerHTML = `
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="metric-label">Nhà cung cấp đám mây</div>
+          <div class="metric-value" style="font-size:15px; font-weight:700;">${d.cloudEnvironment.provider}</div>
+          <div class="metric-sub">${d.cloudEnvironment.platform}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Runtime</div>
+          <div class="metric-value" style="font-size:15px;">Node ${d.cloudEnvironment.nodeVersion}</div>
+          <div class="metric-sub">${d.cloudEnvironment.cpuCores} CPU Cores</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Uptime Hệ thống</div>
+          <div class="metric-value">${formatUptime(d.uptimeSeconds)}</div>
+          <div class="metric-sub">${new Date(d.timestamp).toLocaleString('vi-VN')}</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Bộ nhớ Tiến trình</div>
+          <div class="metric-value">${d.processMetrics.heapUsedMB} MB</div>
+          <div class="metric-sub">Heap / ${d.processMetrics.heapTotalMB} MB tổng</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Database (DBaaS)</div>
+          <div class="metric-value" style="font-size:14px; margin:4px 0;">${statusDot(d.integrations.database)}</div>
+          <div class="metric-sub">MongoDB Atlas</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Cache (Redis)</div>
+          <div class="metric-value" style="font-size:14px; margin:4px 0;">${statusDot(d.integrations.caching)}</div>
+          <div class="metric-sub">In-memory / Redis Cloud</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Message Queue</div>
+          <div class="metric-value" style="font-size:14px; margin:4px 0;">${statusDot(d.integrations.backgroundQueue)}</div>
+          <div class="metric-sub">BullMQ Worker</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">RAM Hệ thống</div>
+          <div class="metric-value">${d.cloudEnvironment.freeMemoryMB} MB</div>
+          <div class="metric-sub">Còn trống / ${d.cloudEnvironment.totalMemoryMB} MB tổng</div>
+        </div>
+      </div>`;
+  } catch {
+    document.getElementById('healthContent').innerHTML = '<p style="color:var(--danger); text-align:center; padding:30px;">Không thể kết nối tới server</p>';
+  }
+}
 
-      const formData = new FormData();
-      formData.append('file', fileInput.files[0]);
-
-      try {
-        const res = await fetch(`/api/tasks/${taskId}/attachments`, {
-          method: 'POST',
-          body: formData
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-
-        closeModal('uploadModal');
-        fileInput.value = '';
-        await loadTasks();
-        alert('Tải lên tệp đính kèm thành công!');
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
-    // Xuất báo cáo Excel
-    async function exportExcelReport() {
-      const projectId = document.getElementById('projectSelect').value;
-      let url = '/api/tasks/actions/export';
-      if (projectId) url += `?projectId=${projectId}`;
-
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-
-        // Kích hoạt tải về
-        window.open(data.downloadUrl, '_blank');
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
-    // Tải metrics giám sát Cloud
-    async function fetchHealthMetrics() {
-      try {
-        const res = await fetch('/api/health');
-        if (res.ok) {
-          const d = await res.json();
-          document.getElementById('cloudEnvBadge').innerText = `${d.cloudEnvironment.provider} • Uptime ${d.uptimeSeconds}s`;
-        }
-      } catch (e) {
-        console.warn('Lỗi lấy health metric:', e);
-      }
-    }
-
-    async function openHealthModal() {
-      openModal('healthModal');
-      const box = document.getElementById('healthContent');
-      box.innerHTML = '<p>Đang tải dữ liệu Cloud Observability...</p>';
-
-      try {
-        const res = await fetch('/api/health');
-        const d = await res.json();
-        box.innerHTML = `
-          <div class="health-metric"><b>Môi trường Đám mây:</b> ${d.cloudEnvironment.provider} (${d.cloudEnvironment.platform})</div>
-          <div class="health-metric"><b>Runtime:</b> Node ${d.cloudEnvironment.nodeVersion} (${d.cloudEnvironment.cpuCores} CPU Cores)</div>
-          <div class="health-metric"><b>Cơ sở dữ liệu (DBaaS):</b> <span style="color: green; font-weight: 600;">${d.integrations.database}</span></div>
-          <div class="health-metric"><b>Hệ thống Caching:</b> <span style="color: #2563eb; font-weight: 600;">${d.integrations.caching}</span></div>
-          <div class="health-metric"><b>Hàng đợi tác vụ (Message Queue):</b> <span style="color: #d97706; font-weight: 600;">${d.integrations.backgroundQueue}</span></div>
-          <div class="health-metric"><b>Bộ nhớ Tiến trình:</b> RSS: ${d.processMetrics.rssMB} MB | Heap: ${d.processMetrics.heapUsedMB}/${d.processMetrics.heapTotalMB} MB</div>
-          <div class="health-metric"><b>Thời gian hoạt động (Uptime):</b> ${d.uptimeSeconds} giây</div>
-        `;
-      } catch (err) {
-        box.innerHTML = `<p style="color: red;">Không thể tải dữ liệu giám sát: ${err.message}</p>`;
-      }
-    }
-
-    function escapeHtml(text) {
-      if (!text) return '';
-      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-  </script>
+// =============================================
+//  UTILS
+// =============================================
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function switchView(view, el) {
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+}
+</script>
 </body>
 </html>

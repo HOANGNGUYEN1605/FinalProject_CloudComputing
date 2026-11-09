@@ -16,6 +16,10 @@ const healthRoutes = require('./routes/healthRoutes');
 
 const app = express();
 
+// Trust proxy — bắt buộc khi deploy trên Render, Vercel, Railway, Heroku (đứng sau reverse proxy)
+// Cho phép express-rate-limit đọc IP thực từ header X-Forwarded-For
+app.set('trust proxy', 1);
+
 // 1. Middlewares
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
