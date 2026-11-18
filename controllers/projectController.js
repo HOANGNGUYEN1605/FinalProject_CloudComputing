@@ -92,16 +92,16 @@ exports.createProject = async (req, res) => {
         // Bắn job gửi Email thông báo bất đồng bộ qua Queue / Nodemailer
         await addQueueJob('send-email', {
           to: email,
-          subject: `[CloudBoard] Bạn đã được thêm vào dự án nhóm: ${name.trim()}`,
+          subject: `[CloudBoard] You have been added to team project: ${name.trim()}`,
           html: `
             <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1e293b;">
-              <h2 style="color: #4f46e5;">Bạn đã được thêm vào dự án nhóm trên CloudBoard</h2>
-              <p>Xin chào,</p>
-              <p><b>${ownerName}</b> (${ownerEmail}) vừa thêm bạn vào dự án: <b style="font-size: 16px; color: #0f172a;">${name.trim()}</b>.</p>
+              <h2 style="color: #4f46e5;">You have been added to a team project on CloudBoard</h2>
+              <p>Hello,</p>
+              <p><b>${ownerName}</b> (${ownerEmail}) has added you to team project: <b style="font-size: 16px; color: #0f172a;">${name.trim()}</b>.</p>
               ${description ? `<p style="background: #f1f5f9; padding: 12px; border-left: 4px solid #6366f1; border-radius: 4px;"><i>"${description}"</i></p>` : ''}
-              <p>Bạn đã có thể đăng nhập bằng Gmail tại: <a href="https://finalproject-cloudcomputing.onrender.com" style="color: #4f46e5; font-weight: bold;">CloudBoard Platform</a> để theo dõi và nhận phân công công việc.</p>
+              <p>You can now sign in with your Gmail at: <a href="https://finalproject-cloudcomputing.onrender.com" style="color: #4f46e5; font-weight: bold;">CloudBoard Platform</a> to collaborate on tasks.</p>
               <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-              <p style="font-size: 12px; color: #64748b;">Đây là email tự động từ hệ thống CloudBoard (VKU Cloud Computing Final Project).</p>
+              <p style="font-size: 12px; color: #64748b;">This is an automated notification from CloudBoard (VKU Cloud Computing Final Project).</p>
             </div>
           `
         });
@@ -123,7 +123,7 @@ exports.createProject = async (req, res) => {
       .populate('members', 'name email avatar');
 
     res.status(201).json({
-      message: `Đã tạo dự án "${project.name}" thành công với ${memberIds.length} thành viên!`,
+      message: `Project "${project.name}" created successfully with ${memberIds.length} member(s)!`,
       project: populatedProject,
       memberCount: memberIds.length
     });
@@ -288,11 +288,11 @@ exports.acceptInvitation = async (req, res) => {
     await clearCache('user_projects_');
 
     res.status(200).json({
-      message: `Bạn đã tham gia thành công vào dự án "${project.name}"!`,
+      message: `You have successfully joined project "${project.name}"!`,
       project
     });
   } catch (err) {
-    res.status(500).json({ error: 'Lỗi khi chấp nhận lời mời: ' + err.message });
+    res.status(500).json({ error: 'Failed to accept invitation: ' + err.message });
   }
 };
 
@@ -303,21 +303,21 @@ exports.declineInvitation = async (req, res) => {
     const userEmail = (req.user.email || '').toLowerCase().trim();
 
     const project = await Project.findById(id);
-    if (!project) return res.status(404).json({ error: 'Không tìm thấy dự án' });
+    if (!project) return res.status(404).json({ error: 'Project not found' });
 
     const inviteIndex = project.invitations.findIndex(
       iv => iv.email === userEmail && iv.status === 'PENDING'
     );
 
     if (inviteIndex === -1) {
-      return res.status(400).json({ error: 'Không tìm thấy lời mời đang chờ' });
+      return res.status(400).json({ error: 'No pending invitation found' });
     }
 
     project.invitations[inviteIndex].status = 'DECLINED';
     await project.save();
     await clearCache('user_projects_');
 
-    res.status(200).json({ message: 'Đã từ chối lời mời tham gia dự án' });
+    res.status(200).json({ message: 'Declined project invitation' });
   } catch (err) {
     res.status(500).json({ error: 'Lỗi từ chối lời mời: ' + err.message });
   }

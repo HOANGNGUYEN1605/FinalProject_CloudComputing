@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" data-theme="light">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -1017,27 +1017,27 @@
   </div>
 
   <div class="sidebar-section">
-    <div class="sidebar-section-label">Điều hướng</div>
+    <div class="sidebar-section-label">Navigation</div>
     <button class="sidebar-item active" onclick="switchView('kanban', this)">
-      <span class="item-icon">📋</span> Bảng Kanban
+      <span class="item-icon">📋</span> Kanban Board
     </button>
     <button class="sidebar-item" onclick="openHealthModal()">
-      <span class="item-icon">📡</span> Giám Sát Cloud
+      <span class="item-icon">📡</span> Cloud Monitoring
     </button>
     <button class="sidebar-item" onclick="exportExcelReport()">
-      <span class="item-icon">📊</span> Xuất Báo Cáo Excel
+      <span class="item-icon">📊</span> Export Excel Report
     </button>
   </div>
 
   <div class="sidebar-section">
-    <div class="sidebar-section-label">Dự án</div>
+    <div class="sidebar-section-label">Projects</div>
   </div>
   <div class="sidebar-projects" id="sidebarProjects">
-    <div style="font-size: 12px; color: rgba(255,255,255,0.3); padding: 6px 10px;">Chưa có dự án nào</div>
+    <div style="font-size: 12px; color: rgba(255,255,255,0.3); padding: 6px 10px;">No projects yet</div>
   </div>
   <div style="padding: 0 12px 8px;">
     <button class="sidebar-item" onclick="openProjectModal()" style="border: 1px dashed rgba(255,255,255,0.15); justify-content: center;">
-      <span class="item-icon">+</span> Tạo dự án mới
+      <span class="item-icon">+</span> Create New Project
     </button>
   </div>
 
@@ -1045,8 +1045,8 @@
     <div class="user-card" id="sidebarUserCard" onclick="openAuthModal()">
       <div class="user-avatar" id="sidebarAvatarIcon">?</div>
       <div class="user-info">
-        <div class="user-name" id="sidebarUserName">Chưa đăng nhập</div>
-        <div class="user-role" id="sidebarUserRole">Nhấn để đăng nhập</div>
+        <div class="user-name" id="sidebarUserName">Not signed in</div>
+        <div class="user-role" id="sidebarUserRole">Click to sign in</div>
       </div>
     </div>
   </div>
@@ -1060,22 +1060,22 @@
     <div class="topbar-left">
       <button class="btn btn-ghost btn-icon" id="mobileMenuBtn" onclick="document.getElementById('sidebar').classList.toggle('open')" style="display:none">☰</button>
       <div>
-        <div class="page-title" id="pageTitle">Tất cả công việc</div>
-        <div class="page-subtitle" id="pageSubtitle">Quản lý & theo dõi tiến độ theo thời gian thực</div>
+        <div class="page-title" id="pageTitle">All Tasks</div>
+        <div class="page-subtitle" id="pageSubtitle">Real-time task tracking & management</div>
       </div>
     </div>
     <div class="topbar-right">
       <div class="cloud-pill" id="cloudPill">
         <div class="live-dot"></div>
-        <span id="cloudPillText">Đang kết nối...</span>
+        <span id="cloudPillText">Connecting...</span>
       </div>
-      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Chuyển giao diện Sáng/Tối">🌙</button>
-      <button class="btn btn-ghost btn-sm" id="invitationsBtn" onclick="openInvitationsModal()" style="display:none; gap:6px; border:1px solid var(--border);" title="Xem lời mời dự án nhóm">
-        <span>📬 Lời mời</span>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle Light/Dark Theme">🌙</button>
+      <button class="btn btn-ghost btn-sm" id="invitationsBtn" onclick="openInvitationsModal()" style="display:none; gap:6px; border:1px solid var(--border);" title="View project invitations">
+        <span>📬 Invitations</span>
         <span class="chat-badge" id="invitationBadge" style="position:static; display:inline-flex; min-width:18px; height:18px; font-size:10px;">0</span>
       </button>
       <div id="topbarUserArea">
-        <button class="btn btn-primary" onclick="openAuthModal()">🔑 Đăng Nhập</button>
+        <button class="btn btn-primary" onclick="openAuthModal()">🔑 Sign In</button>
       </div>
     </div>
   </header>
@@ -1086,43 +1086,43 @@
     <!-- STAT CARDS -->
     <div class="stats-row">
       <div class="stat-card card-blue">
-        <div class="stat-label">Tổng công việc</div>
+        <div class="stat-label">Total Tasks</div>
         <div class="stat-value" id="statTotal">0</div>
         <div class="progress-bar-wrap">
           <div class="progress-bar-fill" id="progTotal" style="width:0%; background:#3b82f6"></div>
         </div>
         <div class="stat-footer" style="margin-top:8px">
-          <span>Toàn bộ trong hệ thống</span>
+          <span>All tasks in workspace</span>
         </div>
       </div>
       <div class="stat-card card-purple">
-        <div class="stat-label">Đang thực hiện</div>
+        <div class="stat-label">In Progress</div>
         <div class="stat-value" id="statProgress">0</div>
         <div class="progress-bar-wrap">
           <div class="progress-bar-fill" id="progProgress" style="width:0%; background:var(--primary)"></div>
         </div>
         <div class="stat-footer" style="margin-top:8px">
-          <span class="stat-trend neutral" id="progRateText">0%</span>&nbsp;tổng số
+          <span class="stat-trend neutral" id="progRateText">0%</span>&nbsp;of total
         </div>
       </div>
       <div class="stat-card card-green">
-        <div class="stat-label">Đã hoàn thành</div>
+        <div class="stat-label">Completed</div>
         <div class="stat-value" id="statDone">0</div>
         <div class="progress-bar-wrap">
           <div class="progress-bar-fill" id="progDone" style="width:0%; background:var(--success)"></div>
         </div>
         <div class="stat-footer" style="margin-top:8px">
-          <span class="stat-trend up" id="doneRateText">0%</span>&nbsp;hoàn thành
+          <span class="stat-trend up" id="doneRateText">0%</span>&nbsp;completed
         </div>
       </div>
       <div class="stat-card card-orange">
-        <div class="stat-label">Tiến độ chung</div>
+        <div class="stat-label">Overall Progress</div>
         <div class="stat-value" id="statPct">0%</div>
         <div class="progress-bar-wrap">
           <div class="progress-bar-fill" id="progOverall" style="width:0%"></div>
         </div>
         <div class="stat-footer" style="margin-top:8px">
-          <span>Dựa trên task đã xong</span>
+          <span>Based on completed tasks</span>
         </div>
       </div>
     </div>
@@ -1132,20 +1132,20 @@
       <div class="toolbar-left">
         <div class="search-box">
           🔍
-          <input type="text" id="searchInput" placeholder="Tìm kiếm công việc..." oninput="filterBoard()" />
+          <input type="text" id="searchInput" placeholder="Search tasks..." oninput="filterBoard()" />
         </div>
         <div class="filter-chips" id="priorityFilters">
-          <span class="chip active" data-prio="all" onclick="setPrioFilter('all', this)">Tất cả</span>
-          <span class="chip" data-prio="Urgent" onclick="setPrioFilter('Urgent', this)">🔴 Khẩn cấp</span>
-          <span class="chip" data-prio="High" onclick="setPrioFilter('High', this)">🟠 Cao</span>
-          <span class="chip" data-prio="Medium" onclick="setPrioFilter('Medium', this)">🟡 Trung bình</span>
-          <span class="chip" data-prio="Low" onclick="setPrioFilter('Low', this)">🔵 Thấp</span>
+          <span class="chip active" data-prio="all" onclick="setPrioFilter('all', this)">All</span>
+          <span class="chip" data-prio="Urgent" onclick="setPrioFilter('Urgent', this)">🔴 Urgent</span>
+          <span class="chip" data-prio="High" onclick="setPrioFilter('High', this)">🟠 High</span>
+          <span class="chip" data-prio="Medium" onclick="setPrioFilter('Medium', this)">🟡 Medium</span>
+          <span class="chip" data-prio="Low" onclick="setPrioFilter('Low', this)">🔵 Low</span>
         </div>
       </div>
       <div class="toolbar-right">
-        <button class="btn btn-ghost btn-sm" onclick="loadTasks()">🔄 Làm mới</button>
+        <button class="btn btn-ghost btn-sm" onclick="loadTasks()">🔄 Refresh</button>
         <button class="btn btn-primary" onclick="openTaskModal()">
-          + Thêm Công Việc
+          + New Task
         </button>
       </div>
     </div>
@@ -1156,48 +1156,48 @@
       <div class="kanban-col">
         <div class="col-header">
           <div class="col-header-top">
-            <div class="col-title"><span class="col-dot dot-todo"></span>Cần làm <span class="col-count-badge" id="cnt-TODO">0</span></div>
+            <div class="col-title"><span class="col-dot dot-todo"></span>To Do <span class="col-count-badge" id="cnt-TODO">0</span></div>
           </div>
           <div class="col-progress-bar"><div class="col-progress-fill fill-todo" id="fill-TODO" style="width:0%"></div></div>
         </div>
         <div class="col-body" id="col-TODO">
-          <div class="col-empty" id="empty-TODO"><div class="col-empty-icon">📋</div><div class="col-empty-text">Chưa có công việc</div></div>
+          <div class="col-empty" id="empty-TODO"><div class="col-empty-icon">📋</div><div class="col-empty-text">No tasks yet</div></div>
         </div>
       </div>
       <!-- IN_PROGRESS -->
       <div class="kanban-col">
         <div class="col-header">
           <div class="col-header-top">
-            <div class="col-title"><span class="col-dot dot-progress"></span>Đang làm <span class="col-count-badge" id="cnt-IN_PROGRESS">0</span></div>
+            <div class="col-title"><span class="col-dot dot-progress"></span>In Progress <span class="col-count-badge" id="cnt-IN_PROGRESS">0</span></div>
           </div>
           <div class="col-progress-bar"><div class="col-progress-fill fill-progress" id="fill-IN_PROGRESS" style="width:0%"></div></div>
         </div>
         <div class="col-body" id="col-IN_PROGRESS">
-          <div class="col-empty" id="empty-IN_PROGRESS"><div class="col-empty-icon">⚙️</div><div class="col-empty-text">Không có task đang chạy</div></div>
+          <div class="col-empty" id="empty-IN_PROGRESS"><div class="col-empty-icon">⚙️</div><div class="col-empty-text">No active tasks</div></div>
         </div>
       </div>
       <!-- IN_REVIEW -->
       <div class="kanban-col">
         <div class="col-header">
           <div class="col-header-top">
-            <div class="col-title"><span class="col-dot dot-review"></span>Chờ duyệt <span class="col-count-badge" id="cnt-IN_REVIEW">0</span></div>
+            <div class="col-title"><span class="col-dot dot-review"></span>In Review <span class="col-count-badge" id="cnt-IN_REVIEW">0</span></div>
           </div>
           <div class="col-progress-bar"><div class="col-progress-fill fill-review" id="fill-IN_REVIEW" style="width:0%"></div></div>
         </div>
         <div class="col-body" id="col-IN_REVIEW">
-          <div class="col-empty" id="empty-IN_REVIEW"><div class="col-empty-icon">🔍</div><div class="col-empty-text">Không có task chờ review</div></div>
+          <div class="col-empty" id="empty-IN_REVIEW"><div class="col-empty-icon">🔍</div><div class="col-empty-text">No tasks awaiting review</div></div>
         </div>
       </div>
       <!-- DONE -->
       <div class="kanban-col">
         <div class="col-header">
           <div class="col-header-top">
-            <div class="col-title"><span class="col-dot dot-done"></span>Hoàn tất <span class="col-count-badge" id="cnt-DONE">0</span></div>
+            <div class="col-title"><span class="col-dot dot-done"></span>Completed <span class="col-count-badge" id="cnt-DONE">0</span></div>
           </div>
           <div class="col-progress-bar"><div class="col-progress-fill fill-done" id="fill-DONE" style="width:0%"></div></div>
         </div>
         <div class="col-body" id="col-DONE">
-          <div class="col-empty" id="empty-DONE"><div class="col-empty-icon">✅</div><div class="col-empty-text">Chưa hoàn tất công việc nào</div></div>
+          <div class="col-empty" id="empty-DONE"><div class="col-empty-icon">✅</div><div class="col-empty-text">No completed tasks yet</div></div>
         </div>
       </div>
     </div>
@@ -1209,35 +1209,35 @@
 <div class="modal-backdrop" id="authModal">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title-wrap"><span class="modal-icon">🔑</span><span class="modal-title">Tài khoản</span></div>
+      <div class="modal-title-wrap"><span class="modal-icon">🔑</span><span class="modal-title">Account</span></div>
       <button class="modal-close" onclick="closeModal('authModal')">✕</button>
     </div>
     <div class="modal-body">
       <div class="auth-tabs">
-        <button class="auth-tab active" id="loginTab" onclick="setAuthMode('login')">Đăng nhập</button>
-        <button class="auth-tab" id="registerTab" onclick="setAuthMode('register')">Đăng ký</button>
+        <button class="auth-tab active" id="loginTab" onclick="setAuthMode('login')">Sign In</button>
+        <button class="auth-tab" id="registerTab" onclick="setAuthMode('register')">Sign Up</button>
       </div>
       <form id="authForm" onsubmit="handleAuthSubmit(event)">
         <div class="form-group" id="nameGroup" style="display:none">
-          <label class="form-label">Họ và Tên</label>
-          <input type="text" id="authName" class="form-control" placeholder="Nguyễn Văn A" />
+          <label class="form-label">Full Name</label>
+          <input type="text" id="authName" class="form-control" placeholder="John Doe" />
         </div>
         <div class="form-group">
           <label class="form-label">Email</label>
-          <input type="email" id="authEmail" class="form-control" placeholder="student@vku.udn.vn" required />
+          <input type="email" id="authEmail" class="form-control" placeholder="user@vku.udn.vn" required />
         </div>
         <div class="form-group">
-          <label class="form-label">Mật khẩu</label>
-          <input type="password" id="authPassword" class="form-control" placeholder="Tối thiểu 6 ký tự" required />
+          <label class="form-label">Password</label>
+          <input type="password" id="authPassword" class="form-control" placeholder="Minimum 6 characters" required />
         </div>
         <button type="submit" class="btn btn-primary" id="authSubmitBtn" style="width:100%; padding:11px; font-size:15px; margin-top:4px;">
-          <span id="authBtnLabel">Đăng nhập</span>
+          <span id="authBtnLabel">Sign In</span>
         </button>
       </form>
 
       <div style="display:flex; align-items:center; margin:18px 0 14px; gap:10px;">
         <div style="flex:1; height:1px; background:var(--border);"></div>
-        <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Hoặc với Google</span>
+        <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Or with Google</span>
         <div style="flex:1; height:1px; background:var(--border);"></div>
       </div>
 
@@ -1247,7 +1247,7 @@
         <!-- Fallback Custom Button -->
         <button type="button" id="googleFallbackBtn" class="btn btn-ghost" style="width:100%; justify-content:center; padding:10px; font-weight:600;" onclick="promptGoogleSignIn()">
           <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-          <span>Tiếp tục với Google / Gmail</span>
+          <span>Continue with Google / Gmail</span>
         </button>
       </div>
     </div>
@@ -1258,42 +1258,42 @@
 <div class="modal-backdrop" id="projectModal">
   <div class="modal" style="max-width: 540px;">
     <div class="modal-header">
-      <div class="modal-title-wrap"><span class="modal-icon">📁</span><span class="modal-title">Tạo dự án mới</span></div>
+      <div class="modal-title-wrap"><span class="modal-icon">📁</span><span class="modal-title">Create New Project</span></div>
       <button class="modal-close" onclick="closeModal('projectModal')">✕</button>
     </div>
     <div class="modal-body">
       <form id="projectForm" onsubmit="handleCreateProject(event)">
         <div class="form-group">
-          <label class="form-label">Tên dự án *</label>
-          <input type="text" id="projName" class="form-control" placeholder="Ví dụ: Đồ án Điện toán Đám mây VKU..." required />
+          <label class="form-label">Project Name *</label>
+          <input type="text" id="projName" class="form-control" placeholder="e.g. VKU Cloud Computing Project..." required />
         </div>
         <div class="form-group">
-          <label class="form-label">Mô tả / Mục tiêu</label>
-          <textarea id="projDesc" class="form-control" placeholder="Mục tiêu của dự án, phạm vi công việc..."></textarea>
+          <label class="form-label">Description / Objectives</label>
+          <textarea id="projDesc" class="form-control" placeholder="Project objectives, scope of work..."></textarea>
         </div>
         
         <!-- THÀNH VIÊN DỰ ÁN NGAY LÚC TẠO -->
         <div class="form-group">
           <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
-            <span>👥 Thêm thành viên vào dự án ngay lúc tạo</span>
-            <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">Gợi ý tên Gmail trong Task</span>
+            <span>👥 Add Team Members Upon Creation</span>
+            <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">Gmail suggestion in Tasks</span>
           </label>
           <div style="display:flex; gap:8px; margin-bottom:8px;">
-            <input type="text" id="newProjMemberInput" class="form-control" placeholder="Nhập Gmail thành viên (ví dụ: friend@gmail.com)..." onkeydown="handleNewMemberKey(event)" />
-            <button type="button" class="btn btn-primary" onclick="addMemberToNewProjList()" style="white-space:nowrap; padding:0 14px; font-size:13px; font-weight:600;">+ Thêm</button>
+            <input type="text" id="newProjMemberInput" class="form-control" placeholder="Enter member's Gmail (e.g. teammate@gmail.com)..." onkeydown="handleNewMemberKey(event)" />
+            <button type="button" class="btn btn-primary" onclick="addMemberToNewProjList()" style="white-space:nowrap; padding:0 14px; font-size:13px; font-weight:600;">+ Add</button>
           </div>
           <div style="font-size:11.5px; color:var(--text-muted); margin-bottom:10px; line-height:1.4;">
-            💡 <b>Quy tắc quan trọng:</b> Chỉ những thành viên được thêm ngay tại đây (hoặc vào dự án này) mới xuất hiện trong danh sách gợi ý phân công công việc (Task) của dự án.
+            💡 <b>Important rule:</b> Only members added here (or to this project) will appear in the task assignment suggestion list for this project.
           </div>
           
-          <div style="font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">Danh sách thành viên dự án:</div>
+          <div style="font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">Project Members List:</div>
           <div id="newProjMembersList" style="display:flex; flex-wrap:wrap; gap:8px; min-height:42px; padding:10px; background:var(--bg-input, #f8fafc); border:1px solid var(--border-color, #e2e8f0); border-radius:8px;">
             <!-- Render badges -->
           </div>
         </div>
 
         <button type="submit" class="btn btn-primary" id="btnSubmitCreateProj" style="width:100%; margin-top:12px; padding:10px; font-weight:600;">
-          Tạo dự án & Thêm thành viên
+          Create Project & Add Members
         </button>
       </form>
     </div>
@@ -1304,12 +1304,12 @@
 <div class="modal-backdrop" id="invitationsModal">
   <div class="modal" style="max-width:540px;">
     <div class="modal-header">
-      <div class="modal-title-wrap"><span class="modal-icon">📬</span><span class="modal-title">Hộp Thư Lời Mời Dự Án Nhóm</span></div>
+      <div class="modal-title-wrap"><span class="modal-icon">📬</span><span class="modal-title">Team Project Invitations Inbox</span></div>
       <button class="modal-close" onclick="closeModal('invitationsModal')">✕</button>
     </div>
     <div class="modal-body">
       <div id="invitationsListContainer">
-        <!-- Danh sách lời mời hiển thị tại đây -->
+        <!-- Invitations list displayed here -->
       </div>
     </div>
   </div>
@@ -1319,66 +1319,66 @@
 <div class="modal-backdrop" id="taskModal">
   <div class="modal modal-lg">
     <div class="modal-header">
-      <div class="modal-title-wrap"><span class="modal-icon" id="taskModalIcon">✚</span><span class="modal-title" id="taskModalTitle">Thêm Công Việc Mới</span></div>
+      <div class="modal-title-wrap"><span class="modal-icon" id="taskModalIcon">✚</span><span class="modal-title" id="taskModalTitle">Add New Task</span></div>
       <button class="modal-close" onclick="closeModal('taskModal')">✕</button>
     </div>
     <div class="modal-body">
       <form id="taskForm" onsubmit="handleTaskSubmit(event)">
         <input type="hidden" id="editTaskId" />
         <div class="form-group">
-          <label class="form-label">Tiêu đề công việc *</label>
-          <input type="text" id="taskTitle" class="form-control" placeholder="Mô tả ngắn gọn công việc cần làm..." required />
+          <label class="form-label">Task Title *</label>
+          <input type="text" id="taskTitle" class="form-control" placeholder="Brief summary of the task..." required />
         </div>
         <div class="form-group">
-          <label class="form-label">Mô tả chi tiết</label>
-          <textarea id="taskDesc" class="form-control" rows="3" placeholder="Yêu cầu, phạm vi, kết quả mong đợi..."></textarea>
+          <label class="form-label">Detailed Description</label>
+          <textarea id="taskDesc" class="form-control" rows="3" placeholder="Requirements, scope, expected results..."></textarea>
         </div>
         <div class="form-row-3">
           <div class="form-group">
-            <label class="form-label">Độ ưu tiên</label>
+            <label class="form-label">Priority</label>
             <select id="taskPriority" class="form-control">
-              <option value="Low">🔵 Thấp</option>
-              <option value="Medium" selected>🟡 Trung bình</option>
-              <option value="High">🟠 Cao</option>
-              <option value="Urgent">🔴 Khẩn cấp</option>
+              <option value="Low">🔵 Low</option>
+              <option value="Medium" selected>🟡 Medium</option>
+              <option value="High">🟠 High</option>
+              <option value="Urgent">🔴 Urgent</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Trạng thái</label>
+            <label class="form-label">Status</label>
             <select id="taskStatus" class="form-control">
-              <option value="TODO">📋 Cần làm</option>
-              <option value="IN_PROGRESS">⚙️ Đang làm</option>
-              <option value="IN_REVIEW">🔍 Chờ duyệt</option>
-              <option value="DONE">✅ Hoàn tất</option>
+              <option value="TODO">📋 To Do</option>
+              <option value="IN_PROGRESS">⚙️ In Progress</option>
+              <option value="IN_REVIEW">🔍 In Review</option>
+              <option value="DONE">✅ Completed</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Hạn chót</label>
+            <label class="form-label">Due Date</label>
             <input type="date" id="taskDueDate" class="form-control" />
           </div>
         </div>
         <div class="form-row-2">
           <div class="form-group">
-            <label class="form-label">Thuộc dự án nhóm</label>
+            <label class="form-label">Project</label>
             <select id="taskProject" class="form-control" onchange="handleTaskProjectChange()">
-              <option value="">(Không gán dự án — Việc cá nhân)</option>
+              <option value="">(No Project — Personal Task)</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Giao task này cho ai (Chọn Gmail/Tên) *</label>
+            <label class="form-label">Assignee (Select Member / Gmail) *</label>
             <select id="taskAssignee" class="form-control">
-              <option value="">(Chưa phân công)</option>
+              <option value="">(Unassigned)</option>
             </select>
             <div id="taskAssigneeHelper" style="font-size:11px; color:var(--text-muted); margin-top:4px; line-height:1.3;">
-              💡 Chỉ hiển thị các thành viên thuộc dự án này.
+              💡 Only members belonging to this project are suggested.
             </div>
           </div>
         </div>
       </form>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('taskModal')">Hủy</button>
-      <button class="btn btn-primary" onclick="document.getElementById('taskForm').requestSubmit()" id="taskSubmitBtn">Lưu công việc</button>
+      <button class="btn btn-ghost" onclick="closeModal('taskModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="document.getElementById('taskForm').requestSubmit()" id="taskSubmitBtn">Save Task</button>
     </div>
   </div>
 </div>
@@ -1387,15 +1387,15 @@
 <div class="modal-backdrop" id="uploadModal">
   <div class="modal">
     <div class="modal-header">
-      <div class="modal-title-wrap"><span class="modal-icon">📎</span><span class="modal-title">Đính kèm tệp tin</span></div>
+      <div class="modal-title-wrap"><span class="modal-icon">📎</span><span class="modal-title">Attach File</span></div>
       <button class="modal-close" onclick="closeModal('uploadModal')">✕</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="uploadTaskId" />
       <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
         <div class="drop-zone-icon">☁️</div>
-        <p>Kéo thả tệp vào đây hoặc nhấn để chọn</p>
-        <small>PDF, Word, Excel, Hình ảnh — Tối đa 10MB</small>
+        <p>Drag & drop file here or click to browse</p>
+        <small>PDF, Word, Excel, Images — Up to 10MB</small>
       </div>
       <input type="file" id="fileInput" style="display:none" onchange="handleFileSelected(this)" />
       <div id="selectedFileInfo" style="margin-top:12px; display:none;">
@@ -1410,8 +1410,8 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('uploadModal')">Hủy</button>
-      <button class="btn btn-primary" id="uploadSubmitBtn" onclick="handleUploadSubmit()" disabled>Tải lên Cloud</button>
+      <button class="btn btn-ghost" onclick="closeModal('uploadModal')">Cancel</button>
+      <button class="btn btn-primary" id="uploadSubmitBtn" onclick="handleUploadSubmit()" disabled>Upload to Cloud</button>
     </div>
   </div>
 </div>
@@ -1420,13 +1420,13 @@
 <div class="modal-backdrop" id="healthModal">
   <div class="modal modal-lg">
     <div class="modal-header">
-      <div class="modal-title-wrap"><span class="modal-icon">📡</span><span class="modal-title">Giám Sát Hệ Thống Đám Mây</span></div>
+      <div class="modal-title-wrap"><span class="modal-icon">📡</span><span class="modal-title">Cloud System Monitoring</span></div>
       <button class="modal-close" onclick="closeModal('healthModal')">✕</button>
     </div>
     <div class="modal-body" id="healthContent">
       <div style="text-align:center; padding:40px; color:var(--text-muted);">
         <div class="spinner" style="width:28px; height:28px; border-color:rgba(99,102,241,0.2); border-top-color:var(--primary); margin:0 auto 12px;"></div>
-        <div>Đang tải dữ liệu Cloud Observability...</div>
+        <div>Loading Cloud Observability metrics...</div>
       </div>
     </div>
   </div>
@@ -1436,21 +1436,21 @@
 <div class="modal-backdrop" id="confirmModal">
   <div class="modal" style="max-width:400px">
     <div class="modal-header">
-      <div class="modal-title-wrap"><span class="modal-icon">⚠️</span><span class="modal-title" id="confirmTitle">Xác nhận</span></div>
+      <div class="modal-title-wrap"><span class="modal-icon">⚠️</span><span class="modal-title" id="confirmTitle">Confirm</span></div>
       <button class="modal-close" onclick="closeModal('confirmModal')">✕</button>
     </div>
     <div class="modal-body">
       <p id="confirmMessage" style="color:var(--text-secondary); font-size:14px; line-height:1.6;"></p>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('confirmModal')">Hủy bỏ</button>
-      <button class="btn btn-danger-soft" id="confirmOkBtn">Xác nhận xóa</button>
+      <button class="btn btn-ghost" onclick="closeModal('confirmModal')">Cancel</button>
+      <button class="btn btn-danger-soft" id="confirmOkBtn">Confirm Delete</button>
     </div>
   </div>
 </div>
 
 <!-- ===== FLOATING SMART CHATBOT WIDGET ===== -->
-<button class="chat-trigger-btn" id="chatWidgetBtn" onclick="toggleChatWindow()" title="Trợ lý Thông minh CloudBoard">
+<button class="chat-trigger-btn" id="chatWidgetBtn" onclick="toggleChatWindow()" title="CloudBoard Smart Assistant">
   <span>🤖</span>
   <div class="chat-badge" id="chatBadge">0</div>
 </button>
@@ -1460,15 +1460,15 @@
     <div class="chat-header-info">
       <div class="chat-bot-avatar">🤖</div>
       <div>
-        <div class="chat-header-title">Trợ lý CloudBoard</div>
+        <div class="chat-header-title">CloudBoard Assistant</div>
         <div class="chat-header-sub">
           <span style="width:7px; height:7px; border-radius:50%; background:#10b981; display:inline-block;"></span>
-          <span>Sẵn sàng hỗ trợ & nhắc việc</span>
+          <span>Ready to assist & remind tasks</span>
         </div>
       </div>
     </div>
     <div class="chat-header-actions">
-      <button onclick="toggleChatWindow()" title="Đóng">✕</button>
+      <button onclick="toggleChatWindow()" title="Close">✕</button>
     </div>
   </div>
 
@@ -1477,8 +1477,8 @@
   </div>
 
   <form class="chat-footer" onsubmit="handleSendChatMessage(event)">
-    <input type="text" id="chatInput" class="chat-input" placeholder="Nhắc việc, hạn chót, tìm tài liệu..." autocomplete="off" />
-    <button type="submit" class="chat-send-btn" id="chatSendBtn" title="Gửi tin nhắn">➤</button>
+    <input type="text" id="chatInput" class="chat-input" placeholder="Ask about tasks, deadlines, documents..." autocomplete="off" />
+    <button type="submit" class="chat-send-btn" id="chatSendBtn" title="Send message">➤</button>
   </form>
 </div>
 
@@ -1594,16 +1594,16 @@ function renderAuthUI(user) {
       <div style="display:flex; align-items:center; gap:10px;">
         <div class="user-avatar" style="width:34px; height:34px; font-size:14px;">${initials}</div>
         <span style="font-size:13px; font-weight:600; color:var(--text);">${user.name}</span>
-        <button class="btn btn-ghost btn-sm" onclick="logout()">Đăng xuất</button>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">Sign Out</button>
       </div>`;
     sidebarName.textContent = user.name;
-    sidebarRole.textContent = user.role === 'admin' ? 'Quản trị viên' : 'Thành viên';
+    sidebarRole.textContent = user.role === 'admin' ? 'Administrator' : 'Member';
     sidebarAvatar.textContent = initials;
     sidebarCard.onclick = () => {};
   } else {
-    topbar.innerHTML = `<button class="btn btn-primary" onclick="openAuthModal()">🔑 Đăng Nhập</button>`;
-    sidebarName.textContent = 'Chưa đăng nhập';
-    sidebarRole.textContent = 'Nhấn để đăng nhập';
+    topbar.innerHTML = `<button class="btn btn-primary" onclick="openAuthModal()">🔑 Sign In</button>`;
+    sidebarName.textContent = 'Not signed in';
+    sidebarRole.textContent = 'Click to sign in';
     sidebarAvatar.textContent = '?';
     sidebarCard.onclick = openAuthModal;
   }
@@ -1620,13 +1620,13 @@ function logout(showToast = true) {
   const invBtn = document.getElementById('invitationsBtn');
   if (invBtn) invBtn.style.display = 'none';
   currentProjectFilter = '';
-  document.getElementById('pageTitle').textContent = 'Tất cả công việc';
+  document.getElementById('pageTitle').textContent = 'All Tasks';
   renderSidebarProjects();
   renderKanban();
   updateStats();
   renderAuthUI(null);
   initChatbot();
-  if (showToast) toast('Đã đăng xuất thành công', 'info');
+  if (showToast) toast('Successfully signed out', 'info');
 }
 
 function setAuthMode(mode) {
@@ -1634,7 +1634,7 @@ function setAuthMode(mode) {
   document.getElementById('loginTab').classList.toggle('active', mode === 'login');
   document.getElementById('registerTab').classList.toggle('active', mode === 'register');
   document.getElementById('nameGroup').style.display = mode === 'register' ? 'block' : 'none';
-  document.getElementById('authBtnLabel').textContent = mode === 'login' ? 'Đăng nhập' : 'Đăng ký tài khoản';
+  document.getElementById('authBtnLabel').textContent = mode === 'login' ? 'Sign In' : 'Create Account';
 }
 
 function openAuthModal() { setAuthMode('login'); openModal('authModal'); }
@@ -1656,13 +1656,13 @@ async function handleAuthSubmit(e) {
   try {
     const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Thao tác thất bại');
+    if (!res.ok) throw new Error(data.error || 'Operation failed');
     localStorage.setItem('vku_auth_token', data.token);
     authToken = data.token; currentUser = data.user;
     renderAuthUI(currentUser);
     closeModal('authModal');
     document.getElementById('authForm').reset();
-    toast(authMode === 'login' ? `Chào mừng ${data.user.name}! 👋` : 'Đăng ký tài khoản thành công!', 'success');
+    toast(authMode === 'login' ? `Welcome back, ${data.user.name}! 👋` : 'Account registered successfully!', 'success');
     await fetchUsers();
     await fetchProjects();
     await loadTasks();
@@ -1733,7 +1733,7 @@ function setupGoogleButton() {
 
 async function handleGoogleCredentialResponse(response) {
   if (!response || !response.credential) return;
-  toast('Đang xác thực thông tin tài khoản Google...', 'info');
+  toast('Authenticating Google account...', 'info');
 
   try {
     const res = await fetch('/api/auth/google', {
@@ -1743,14 +1743,14 @@ async function handleGoogleCredentialResponse(response) {
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Đăng nhập Google không thành công');
+    if (!res.ok) throw new Error(data.error || 'Google sign-in was unsuccessful');
 
     localStorage.setItem('vku_auth_token', data.token);
     authToken = data.token;
     currentUser = data.user;
     renderAuthUI(currentUser);
     closeModal('authModal');
-    toast(`Đăng nhập Google thành công! Chào ${data.user.name} 🎉`, 'success');
+    toast(`Google sign-in successful! Welcome, ${data.user.name} 🎉`, 'success');
     await fetchUsers();
     await fetchProjects();
     await loadTasks();
@@ -1766,8 +1766,8 @@ function promptGoogleSignIn() {
     google.accounts.id.prompt();
   } else {
     showConfirm(
-      'Kích hoạt Google Sign-In',
-      'Để đăng nhập thật bằng tài khoản Gmail của bạn, hệ thống cần "GOOGLE_CLIENT_ID" (miễn phí từ Google Cloud Console). Bạn có muốn mở Google Cloud Console để lấy Client ID không?',
+      'Activate Google Sign-In',
+      'To sign in with your real Gmail account, the system requires "GOOGLE_CLIENT_ID" (free from Google Cloud Console). Would you like to open Google Cloud Console to retrieve your Client ID?',
       () => {
         window.open('https://console.cloud.google.com/apis/credentials', '_blank');
       }
@@ -1801,17 +1801,17 @@ async function handleTaskProjectChange() {
   const currentVal = sel.value;
   const projectId = projSelect ? projSelect.value : '';
 
-  sel.innerHTML = '<option value="">(Chưa phân công)</option>';
+  sel.innerHTML = '<option value="">(Unassigned)</option>';
 
   if (!projectId) {
     // Không gán dự án: chỉ hiển thị tài khoản cá nhân của chính mình
     if (currentUser && (currentUser._id || currentUser.id)) {
       const myId = currentUser._id || currentUser.id;
-      const myName = currentUser.name || 'Tôi';
+      const myName = currentUser.name || 'Me';
       const myEmail = currentUser.email || '';
-      sel.innerHTML += `<option value="${myId}">${escHtml(myName)} (Cá nhân) — ✉️ ${escHtml(myEmail)}</option>`;
+      sel.innerHTML += `<option value="${myId}">${escHtml(myName)} (Personal) — ✉️ ${escHtml(myEmail)}</option>`;
     }
-    if (helper) helper.textContent = '💡 Việc cá nhân: chỉ hiển thị tài khoản của bạn.';
+    if (helper) helper.textContent = '💡 Personal task: only assignable to yourself.';
   } else {
     // Dự án nhóm: CHỈ hiển thị thành viên của dự án đó (Chủ dự án và thành viên đã thêm)
     try {
@@ -1826,7 +1826,7 @@ async function handleTaskProjectChange() {
         const project = projectsList.find(p => p._id === projectId);
         if (project) {
           if (project.owner) {
-            const o = typeof project.owner === 'object' ? project.owner : { _id: project.owner, name: 'Chủ dự án', email: '' };
+            const o = typeof project.owner === 'object' ? project.owner : { _id: project.owner, name: 'Project Owner', email: '' };
             if (o._id) members.push({ ...o, isOwner: true });
           }
           if (project.members && project.members.length > 0) {
@@ -1841,17 +1841,17 @@ async function handleTaskProjectChange() {
 
       if (members.length > 0) {
         members.forEach(m => {
-          const roleTitle = m.isOwner ? '👑 (Chủ dự án)' : '👤 (Thành viên)';
+          const roleTitle = m.isOwner ? '👑 (Project Owner)' : '👤 (Member)';
           const emailStr = m.email ? ` — ✉️ ${escHtml(m.email)}` : '';
-          sel.innerHTML += `<option value="${m._id}">${escHtml(m.name || 'Thành viên')} ${roleTitle}${emailStr}</option>`;
+          sel.innerHTML += `<option value="${m._id}">${escHtml(m.name || 'Member')} ${roleTitle}${emailStr}</option>`;
         });
       }
 
       const projObj = projectsList.find(p => p._id === projectId);
-      const projName = projObj ? projObj.name : 'dự án này';
-      if (helper) helper.textContent = `💡 Chỉ hiển thị các thành viên đã được thêm vào dự án "${projName}".`;
+      const projName = projObj ? projObj.name : 'this project';
+      if (helper) helper.textContent = `💡 Only members added to project "${projName}" are suggested.`;
     } catch (e) {
-      console.error('Lỗi khi tải thành viên dự án:', e);
+      console.error('Error loading project members:', e);
     }
   }
 
@@ -1870,10 +1870,10 @@ function getProjectColor(index) { return PROJ_COLORS[index % PROJ_COLORS.length]
 async function fetchProjects() {
   const toolbar = document.getElementById('sidebarProjects');
   const taskSelect = document.getElementById('taskProject');
-  taskSelect.innerHTML = '<option value="">(Không gán dự án — Việc cá nhân)</option>';
+  taskSelect.innerHTML = '<option value="">(No Project — Personal Task)</option>';
 
   if (!authToken) {
-    toolbar.innerHTML = '<div style="font-size:12px; color:rgba(255,255,255,0.3); padding:6px 10px;">Đăng nhập để xem dự án</div>';
+    toolbar.innerHTML = '<div style="font-size:12px; color:rgba(255,255,255,0.3); padding:6px 10px;">Sign in to view projects</div>';
     currentProjectFilter = '';
     return;
   }
@@ -1895,7 +1895,7 @@ async function fetchProjects() {
 function renderSidebarProjects() {
   const container = document.getElementById('sidebarProjects');
   if (projectsList.length === 0) {
-    container.innerHTML = '<div style="font-size:12px; color:rgba(255,255,255,0.3); padding:6px 10px;">Chưa có dự án nào</div>';
+    container.innerHTML = '<div style="font-size:12px; color:rgba(255,255,255,0.3); padding:6px 10px;">No projects yet</div>';
     return;
   }
   container.innerHTML = projectsList.map((p, i) => `
@@ -1905,15 +1905,15 @@ function renderSidebarProjects() {
       <span style="font-size:10px; color:rgba(255,255,255,0.4);">👥 ${(p.members || []).length}</span>
     </div>
   `).join('') + `
-    <div class="sidebar-proj-item ${currentProjectFilter === '' ? 'active' : ''}" onclick="setProjectFilter('', 'Tất cả công việc')" style="margin-top:4px;">
+    <div class="sidebar-proj-item ${currentProjectFilter === '' ? 'active' : ''}" onclick="setProjectFilter('', 'All Tasks')" style="margin-top:4px;">
       <span class="proj-dot" style="background:#94a3b8"></span>
-      <span>Tất cả</span>
+      <span>All Tasks</span>
     </div>`;
 }
 
 function setProjectFilter(projectId, name) {
   currentProjectFilter = projectId;
-  document.getElementById('pageTitle').textContent = name || 'Tất cả công việc';
+  document.getElementById('pageTitle').textContent = name || 'All Tasks';
   renderSidebarProjects();
   loadTasks();
 }
@@ -1931,19 +1931,19 @@ function renderNewProjectMembers() {
   const container = document.getElementById('newProjMembersList');
   if (!container) return;
 
-  const myName = (currentUser && currentUser.name) ? currentUser.name : 'Bạn';
+  const myName = (currentUser && currentUser.name) ? currentUser.name : 'You';
   const myEmail = (currentUser && currentUser.email) ? currentUser.email : '';
 
   let html = `
     <span style="display:inline-flex; align-items:center; gap:6px; background:#e0e7ff; color:#3730a3; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:600; border:1px solid #c7d2fe;">
-      👑 ${escHtml(myName)} (Chủ dự án) <span style="font-size:11px; opacity:0.85;">— ✉️ ${escHtml(myEmail)}</span>
+      👑 ${escHtml(myName)} (Project Owner) <span style="font-size:11px; opacity:0.85;">— ✉️ ${escHtml(myEmail)}</span>
     </span>
   `;
 
   if (newProjectMembers.length === 0) {
     html += `
       <span style="font-size:12px; color:var(--text-muted); align-self:center; margin-left:4px;">
-        (Chưa thêm thành viên nào. Hãy nhập Gmail bên trên và nhấn "+ Thêm")
+        (No members added yet. Enter Gmail above and click "+ Add")
       </span>
     `;
   } else {
@@ -1951,7 +1951,7 @@ function renderNewProjectMembers() {
       html += `
         <span style="display:inline-flex; align-items:center; gap:6px; background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:500;">
           👤 ✉️ <b>${escHtml(email)}</b>
-          <button type="button" onclick="removeMemberFromNewProj(${idx})" title="Xóa thành viên" style="background:none; border:none; cursor:pointer; color:#ef4444; font-weight:bold; font-size:14px; line-height:1; padding:0 2px; margin-left:2px;">✕</button>
+          <button type="button" onclick="removeMemberFromNewProj(${idx})" title="Remove member" style="background:none; border:none; cursor:pointer; color:#ef4444; font-weight:bold; font-size:14px; line-height:1; padding:0 2px; margin-left:2px;">✕</button>
         </span>
       `;
     });
@@ -1975,7 +1975,7 @@ function addMemberToNewProjList() {
 
   const emails = raw.split(/[,;\s]+/).map(s => s.trim().toLowerCase()).filter(s => s.includes('@'));
   if (emails.length === 0) {
-    toast('Vui lòng nhập định dạng Gmail hợp lệ (có chứa @)', 'error');
+    toast('Please enter a valid Gmail / Email address (containing @)', 'error');
     return;
   }
 
@@ -1984,11 +1984,11 @@ function addMemberToNewProjList() {
   let addedCount = 0;
   emails.forEach(email => {
     if (email === myEmail) {
-      toast('Bạn là Chủ dự án và đã luôn có trong danh sách!', 'info');
+      toast('You are the Project Owner and already in the list!', 'info');
       return;
     }
     if (newProjectMembers.includes(email)) {
-      toast(`Gmail "${email}" đã có trong danh sách`, 'warning');
+      toast(`Gmail "${email}" is already in the list`, 'warning');
       return;
     }
     newProjectMembers.push(email);
@@ -1998,7 +1998,7 @@ function addMemberToNewProjList() {
   if (addedCount > 0) {
     input.value = '';
     renderNewProjectMembers();
-    toast(`Đã thêm ${addedCount} thành viên vào danh sách dự án!`, 'success');
+    toast(`Added ${addedCount} member(s) to project list!`, 'success');
   }
 }
 
@@ -2008,7 +2008,7 @@ function removeMemberFromNewProj(index) {
 }
 
 async function openProjectModal() {
-  if (!authToken) { toast('Vui lòng đăng nhập trước', 'error'); openAuthModal(); return; }
+  if (!authToken) { toast('Please sign in first', 'error'); openAuthModal(); return; }
   document.getElementById('projectForm').reset();
   initNewProjectModal();
   openModal('projectModal');
@@ -2023,7 +2023,7 @@ async function handleCreateProject(e) {
   const btn = document.getElementById('btnSubmitCreateProj');
   if (btn) {
     btn.disabled = true;
-    btn.textContent = 'Đang tạo dự án...';
+    btn.textContent = 'Creating project...';
   }
 
   try {
@@ -2033,11 +2033,11 @@ async function handleCreateProject(e) {
       body: JSON.stringify({ name, description, memberEmails })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Tạo dự án thất bại');
+    if (!res.ok) throw new Error(data.error || 'Failed to create project');
     closeModal('projectModal');
     document.getElementById('projectForm').reset();
     newProjectMembers = [];
-    toast(data.message || `Đã tạo dự án "${name}" thành công!`, 'success');
+    toast(data.message || `Project "${name}" created successfully!`, 'success');
     await fetchProjects();
     fetchPendingInvitations();
   } catch (err) {
@@ -2045,7 +2045,7 @@ async function handleCreateProject(e) {
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.textContent = 'Tạo dự án & Thêm thành viên';
+      btn.textContent = 'Create Project & Add Members';
     }
   }
 }
@@ -2091,8 +2091,8 @@ function renderInvitationsModal() {
     container.innerHTML = `
       <div style="text-align:center; padding:36px 20px; color:var(--text-muted);">
         <div style="font-size:36px; margin-bottom:10px;">📭</div>
-        <div style="font-weight:600; color:var(--text); margin-bottom:4px;">Không có lời mời nào</div>
-        <div style="font-size:12px;">Khi có người thêm Gmail của bạn vào dự án nhóm, lời mời sẽ xuất hiện tại đây.</div>
+        <div style="font-weight:600; color:var(--text); margin-bottom:4px;">No pending invitations</div>
+        <div style="font-size:12px;">When someone adds your Gmail to a team project, invitations will appear here.</div>
       </div>
     `;
     return;
@@ -2104,16 +2104,16 @@ function renderInvitationsModal() {
         <div>
           <div style="font-size:15px; font-weight:700; color:var(--text);">📁 ${escHtml(inv.projectName)}</div>
           <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">
-            Người mời: <b>${escHtml(inv.invitedBy ? inv.invitedBy.name : 'Chủ dự án')}</b> 
+            Invited by: <b>${escHtml(inv.invitedBy ? inv.invitedBy.name : 'Project Owner')}</b> 
             (${escHtml(inv.invitedBy ? inv.invitedBy.email : '')})
           </div>
         </div>
-        <span style="font-size:11px; background:var(--warning-bg); color:var(--warning); padding:3px 8px; border-radius:999px; font-weight:600;">Đang chờ</span>
+        <span style="font-size:11px; background:var(--warning-bg); color:var(--warning); padding:3px 8px; border-radius:999px; font-weight:600;">Pending</span>
       </div>
       ${inv.projectDesc ? `<div style="font-size:12.5px; color:var(--text-secondary); margin:8px 0; background:var(--surface); padding:8px 10px; border-radius:6px; border:1px solid var(--border);">${escHtml(inv.projectDesc)}</div>` : ''}
       <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">
-        <button class="btn btn-ghost btn-sm" onclick="handleDeclineInvite('${inv.projectId}')" style="color:var(--danger);">❌ Từ chối</button>
-        <button class="btn btn-primary btn-sm" onclick="handleAcceptInvite('${inv.projectId}')">✅ Chấp nhận tham gia</button>
+        <button class="btn btn-ghost btn-sm" onclick="handleDeclineInvite('${inv.projectId}')" style="color:var(--danger);">❌ Decline</button>
+        <button class="btn btn-primary btn-sm" onclick="handleAcceptInvite('${inv.projectId}')">✅ Accept & Join</button>
       </div>
     </div>
   `).join('');
@@ -2126,8 +2126,8 @@ async function handleAcceptInvite(projectId) {
       headers: { Authorization: `Bearer ${authToken}` }
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Chấp nhận lời mời thất bại');
-    toast(data.message, 'success');
+    if (!res.ok) throw new Error(data.error || 'Failed to accept invitation');
+    toast(data.message || 'Joined project successfully!', 'success');
     await fetchPendingInvitations();
     renderInvitationsModal();
     if (pendingInvitationsList.length === 0) closeModal('invitationsModal');
@@ -2145,8 +2145,8 @@ async function handleDeclineInvite(projectId) {
       headers: { Authorization: `Bearer ${authToken}` }
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Từ chối lời mời thất bại');
-    toast(data.message, 'info');
+    if (!res.ok) throw new Error(data.error || 'Failed to decline invitation');
+    toast(data.message || 'Declined invitation', 'info');
     await fetchPendingInvitations();
     renderInvitationsModal();
     if (pendingInvitationsList.length === 0) closeModal('invitationsModal');
@@ -2180,8 +2180,8 @@ async function loadTasks() {
     updateStats();
     fetchChatReminders();
   } catch (err) {
-    console.error('Lỗi khi tải task:', err);
-    toast(err.message || 'Không thể tải danh sách công việc', 'error');
+    console.error('Error loading tasks:', err);
+    toast(err.message || 'Unable to load tasks', 'error');
   }
 }
 
@@ -2210,13 +2210,13 @@ function renderKanban() {
   const tasks = getFilteredTasks();
   const counts = { TODO: 0, IN_PROGRESS: 0, IN_REVIEW: 0, DONE: 0 };
 
-  // Xóa rỗng nội dung cũ của 4 cột
+  // Clear previous column cards
   statuses.forEach(s => {
     const col = document.getElementById(`col-${s}`);
     if (col) col.innerHTML = '';
   });
 
-  // Đổ từng task vào cột tương ứng
+  // Distribute tasks to columns
   tasks.forEach(task => {
     const status = task.status || (task.completed ? 'DONE' : 'TODO');
     counts[status] = (counts[status] || 0) + 1;
@@ -2232,13 +2232,13 @@ function renderKanban() {
   const total = tasks.length;
   const emptyIcons = { TODO: '📋', IN_PROGRESS: '⚙️', IN_REVIEW: '🔍', DONE: '✅' };
   const emptyTexts = {
-    TODO: currentUser ? 'Chưa có công việc' : 'Đăng nhập để xem công việc của bạn',
-    IN_PROGRESS: 'Không có task đang chạy',
-    IN_REVIEW: 'Không có task chờ review',
-    DONE: 'Chưa hoàn tất công việc nào'
+    TODO: currentUser ? 'No tasks to do' : 'Sign in to view your tasks',
+    IN_PROGRESS: 'No tasks in progress',
+    IN_REVIEW: 'No tasks awaiting review',
+    DONE: 'No completed tasks yet'
   };
 
-  // Cập nhật số đếm và render empty state nếu cột rỗng
+  // Update counters & render empty states
   statuses.forEach(s => {
     const cnt = counts[s] || 0;
     const cntEl = document.getElementById(`cnt-${s}`);
@@ -2280,14 +2280,14 @@ function createTaskCard(task, status) {
   }
 
   const assigneeHtml = (assigneeName || assigneeEmail)
-    ? `<div class="task-assignee" title="Người thực hiện: ${escHtml(assigneeName)} (${escHtml(assigneeEmail)})">
+    ? `<div class="task-assignee" title="Assignee: ${escHtml(assigneeName)} (${escHtml(assigneeEmail)})">
         <div class="avatar-xs">${(assigneeName || assigneeEmail).charAt(0).toUpperCase()}</div>
         <div style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:130px;">
           <div style="font-weight:600; color:var(--text); font-size:12px; overflow:hidden; text-overflow:ellipsis;">${escHtml(assigneeName || assigneeEmail)}</div>
           ${assigneeEmail ? `<div style="font-size:10px; color:var(--text-muted); font-weight:400; overflow:hidden; text-overflow:ellipsis;">✉️ ${escHtml(assigneeEmail)}</div>` : ''}
         </div>
       </div>`
-    : `<div class="task-assignee" style="color:var(--text-muted); font-size:11.5px;">(Chưa phân công)</div>`;
+    : `<div class="task-assignee" style="color:var(--text-muted); font-size:11.5px;">(Unassigned)</div>`;
 
   const projName = (task.project && typeof task.project === 'object') ? task.project.name : '';
   const projBadge = projName
@@ -2314,9 +2314,9 @@ function createTaskCard(task, status) {
     <div class="task-footer">
       ${assigneeHtml}
       <div class="task-actions-row">
-        <button class="task-action-btn" onclick="openEditTaskModal(event, '${task._id}')" title="Chỉnh sửa">✏️</button>
-        <button class="task-action-btn" onclick="openUploadModal(event, '${task._id}')" title="Đính kèm tệp">📎</button>
-        <button class="task-action-btn del" onclick="confirmDeleteTask(event, '${task._id}', '${escHtml(task.title)}')" title="Xóa task">🗑️</button>
+        <button class="task-action-btn" onclick="openEditTaskModal(event, '${task._id}')" title="Edit">✏️</button>
+        <button class="task-action-btn" onclick="openUploadModal(event, '${task._id}')" title="Attach file">📎</button>
+        <button class="task-action-btn del" onclick="confirmDeleteTask(event, '${task._id}', '${escHtml(task.title)}')" title="Delete task">🗑️</button>
       </div>
     </div>`;
 
@@ -2354,15 +2354,15 @@ function updateStats() {
 // =============================================
 async function openTaskModal() {
   if (!authToken) {
-    toast('Vui lòng đăng nhập trước khi tạo công việc', 'error');
+    toast('Please sign in before creating a task', 'error');
     openAuthModal();
     return;
   }
   document.getElementById('editTaskId').value = '';
   document.getElementById('taskModalIcon').textContent = '✚';
-  document.getElementById('taskModalTitle').textContent = 'Thêm Công Việc Mới';
+  document.getElementById('taskModalTitle').textContent = 'Add New Task';
   document.getElementById('taskForm').reset();
-  document.getElementById('taskSubmitBtn').textContent = 'Lưu công việc';
+  document.getElementById('taskSubmitBtn').textContent = 'Save Task';
   document.getElementById('taskProject').value = currentProjectFilter || '';
   await handleTaskProjectChange();
   openModal('taskModal');
@@ -2375,7 +2375,7 @@ async function openEditTaskModal(e, taskId) {
 
   document.getElementById('editTaskId').value     = task._id;
   document.getElementById('taskModalIcon').textContent = '✏️';
-  document.getElementById('taskModalTitle').textContent = 'Chỉnh Sửa Công Việc';
+  document.getElementById('taskModalTitle').textContent = 'Edit Task';
   document.getElementById('taskTitle').value      = task.title;
   document.getElementById('taskDesc').value       = task.description || '';
   document.getElementById('taskPriority').value   = task.priority || 'Medium';
@@ -2389,7 +2389,7 @@ async function openEditTaskModal(e, taskId) {
   const assId = task.assignee ? (task.assignee._id || task.assignee) : '';
   document.getElementById('taskAssignee').value   = assId;
 
-  document.getElementById('taskSubmitBtn').textContent = 'Cập nhật';
+  document.getElementById('taskSubmitBtn').textContent = 'Update Task';
   openModal('taskModal');
 }
 
@@ -2424,24 +2424,24 @@ async function handleTaskSubmit(e) {
     if (!res.ok) throw new Error(data.error);
 
     closeModal('taskModal');
-    toast(isEdit ? 'Đã cập nhật công việc!' : 'Đã thêm công việc mới!', 'success');
+    toast(isEdit ? 'Task updated successfully!' : 'New task created successfully!', 'success');
     await loadTasks();
   } catch (err) {
     toast(err.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = isEdit ? 'Cập nhật' : 'Lưu công việc';
+    btn.textContent = isEdit ? 'Update Task' : 'Save Task';
   }
 }
 
 function confirmDeleteTask(e, id, title) {
   e.stopPropagation();
-  showConfirm('Xóa công việc', `Bạn có chắc muốn xóa công việc "${title}"? Hành động này không thể hoàn tác.`, async () => {
+  showConfirm('Delete Task', `Are you sure you want to delete task "${title}"? This action cannot be undone.`, async () => {
     try {
       const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
       const res = await fetch(`/api/tasks/${id}`, { method: 'DELETE', headers });
-      if (!res.ok) throw new Error('Xóa thất bại');
-      toast('Đã xóa công việc!', 'success');
+      if (!res.ok) throw new Error('Failed to delete task');
+      toast('Task deleted successfully!', 'success');
       await loadTasks();
     } catch (err) { toast(err.message, 'error'); }
   });
@@ -2466,7 +2466,7 @@ function handleFileSelected(input) {
   document.getElementById('selectedFileSize').textContent = `${(file.size / 1024).toFixed(1)} KB`;
   document.getElementById('uploadSubmitBtn').disabled = false;
   const dz = document.getElementById('dropZone');
-  dz.innerHTML = `<div style="font-size:28px">✅</div><p style="color:var(--success)">Đã chọn: ${escHtml(file.name)}</p>`;
+  dz.innerHTML = `<div style="font-size:28px">✅</div><p style="color:var(--success)">Selected: ${escHtml(file.name)}</p>`;
 }
 
 function clearSelectedFile() {
@@ -2476,8 +2476,8 @@ function clearSelectedFile() {
   document.getElementById('uploadSubmitBtn').disabled = true;
   document.getElementById('dropZone').innerHTML = `
     <div class="drop-zone-icon">☁️</div>
-    <p>Kéo thả tệp vào đây hoặc nhấn để chọn</p>
-    <small>PDF, Word, Excel, Hình ảnh — Tối đa 10MB</small>`;
+    <p>Drag & drop file here or click to browse</p>
+    <small>PDF, Word, Excel, Images — Up to 10MB</small>`;
 }
 
 // Drag & drop
@@ -2496,7 +2496,7 @@ async function handleUploadSubmit() {
 
   const btn = document.getElementById('uploadSubmitBtn');
   btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div> Đang tải lên...';
+  btn.innerHTML = '<div class="spinner"></div> Uploading...';
 
   const formData = new FormData();
   formData.append('file', selectedFile);
@@ -2506,12 +2506,12 @@ async function handleUploadSubmit() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     closeModal('uploadModal');
-    toast('Tải lên tệp đính kèm thành công!', 'success');
+    toast('File attached successfully!', 'success');
     await loadTasks();
   } catch (err) {
     toast(err.message, 'error');
     btn.disabled = false;
-    btn.textContent = 'Tải lên Cloud';
+    btn.textContent = 'Upload to Cloud';
   }
 }
 
@@ -2521,13 +2521,13 @@ async function handleUploadSubmit() {
 async function exportExcelReport() {
   let url = '/api/tasks/actions/export';
   if (currentProjectFilter) url += `?projectId=${currentProjectFilter}`;
-  toast('Đang tạo file báo cáo Excel...', 'info');
+  toast('Generating Excel report...', 'info');
   try {
     const res = await fetch(url);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     window.open(data.downloadUrl, '_blank');
-    toast('Xuất báo cáo Excel thành công!', 'success');
+    toast('Excel report exported successfully!', 'success');
   } catch (err) { toast(err.message, 'error'); }
 }
 
@@ -2555,38 +2555,38 @@ async function openHealthModal() {
   document.getElementById('healthContent').innerHTML = `
     <div style="text-align:center; padding:40px; color:var(--text-muted);">
       <div class="spinner" style="width:28px; height:28px; border-color:rgba(99,102,241,0.2); border-top-color:var(--primary); margin:0 auto 12px;"></div>
-      <div>Đang tải dữ liệu Cloud Observability...</div>
+      <div>Loading Cloud Observability metrics...</div>
     </div>`;
   try {
     const res = await fetch('/api/health');
     const d   = await res.json();
     const statusDot = (s) => {
-      if (s === 'Connected') return '<span class="status-dot"><span class="dot dot-green"></span> Đang kết nối</span>';
-      if (s.includes('Fallback')) return '<span class="status-dot"><span class="dot dot-yellow"></span> Chế độ Fallback</span>';
-      if (s.includes('Active')) return '<span class="status-dot"><span class="dot dot-green"></span> Đang hoạt động</span>';
+      if (s === 'Connected') return '<span class="status-dot"><span class="dot dot-green"></span> Connected</span>';
+      if (s.includes('Fallback')) return '<span class="status-dot"><span class="dot dot-yellow"></span> Fallback Mode</span>';
+      if (s.includes('Active')) return '<span class="status-dot"><span class="dot dot-green"></span> Active</span>';
       return '<span class="status-dot"><span class="dot dot-red"></span> ' + s + '</span>';
     };
     document.getElementById('healthContent').innerHTML = `
       <div class="metric-grid">
         <div class="metric-card">
-          <div class="metric-label">Nhà cung cấp đám mây</div>
+          <div class="metric-label">Cloud Provider</div>
           <div class="metric-value" style="font-size:15px; font-weight:700;">${d.cloudEnvironment.provider}</div>
           <div class="metric-sub">${d.cloudEnvironment.platform}</div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">Runtime</div>
+          <div class="metric-label">Runtime Environment</div>
           <div class="metric-value" style="font-size:15px;">Node ${d.cloudEnvironment.nodeVersion}</div>
           <div class="metric-sub">${d.cloudEnvironment.cpuCores} CPU Cores</div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">Uptime Hệ thống</div>
+          <div class="metric-label">System Uptime</div>
           <div class="metric-value">${formatUptime(d.uptimeSeconds)}</div>
-          <div class="metric-sub">${new Date(d.timestamp).toLocaleString('vi-VN')}</div>
+          <div class="metric-sub">${new Date(d.timestamp).toLocaleString('en-US')}</div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">Bộ nhớ Tiến trình</div>
+          <div class="metric-label">Process Memory</div>
           <div class="metric-value">${d.processMetrics.heapUsedMB} MB</div>
-          <div class="metric-sub">Heap / ${d.processMetrics.heapTotalMB} MB tổng</div>
+          <div class="metric-sub">Heap / ${d.processMetrics.heapTotalMB} MB total</div>
         </div>
         <div class="metric-card">
           <div class="metric-label">Database (DBaaS)</div>
@@ -2604,18 +2604,18 @@ async function openHealthModal() {
           <div class="metric-sub">BullMQ Worker</div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">Trợ lý AI (Chatbot)</div>
+          <div class="metric-label">AI Assistant (Chatbot)</div>
           <div class="metric-value" style="font-size:14px; margin:4px 0;">${statusDot(d.integrations.aiAssistant || 'Active')}</div>
           <div class="metric-sub">${d.integrations.aiAssistant || 'Smart RAG Assistant'}</div>
         </div>
         <div class="metric-card">
-          <div class="metric-label">RAM Hệ thống</div>
+          <div class="metric-label">System RAM</div>
           <div class="metric-value">${d.cloudEnvironment.freeMemoryMB} MB</div>
-          <div class="metric-sub">Còn trống / ${d.cloudEnvironment.totalMemoryMB} MB tổng</div>
+          <div class="metric-sub">Free / ${d.cloudEnvironment.totalMemoryMB} MB total</div>
         </div>
       </div>`;
   } catch {
-    document.getElementById('healthContent').innerHTML = '<p style="color:var(--danger); text-align:center; padding:30px;">Không thể kết nối tới server</p>';
+    document.getElementById('healthContent').innerHTML = '<p style="color:var(--danger); text-align:center; padding:30px;">Unable to connect to server</p>';
   }
 }
 
@@ -2667,7 +2667,7 @@ async function fetchChatReminders() {
       if (count > 0) {
         badge.textContent = count > 9 ? '9+' : count;
         badge.style.display = 'flex';
-        badge.title = `${data.overdueCount} việc quá hạn, ${data.todayCount} việc hôm nay!`;
+        badge.title = `${data.overdueCount} overdue tasks, ${data.todayCount} tasks due today!`;
       } else {
         badge.style.display = 'none';
       }
@@ -2693,20 +2693,20 @@ function toggleChatWindow() {
 }
 
 function renderInitialBotMessage() {
-  const name = currentUser ? currentUser.name : 'bạn';
+  const name = currentUser ? currentUser.name : 'there';
   const welcomeText = currentUser
-    ? `Xin chào **${name}**! 👋 Tôi là **Trợ lý Thông minh CloudBoard** 🤖.\n\nTôi có thể giúp bạn kiểm tra **việc quá hạn**, **hạn chót hôm nay**, hoặc **truy xuất tệp tài liệu đính kèm** trong các dự án của bạn.\n\nBạn cần hỗ trợ gì hôm nay?`
-    : `Xin chào bạn! 👋 Tôi là **Trợ lý Thông minh CloudBoard** 🤖.\n\nĐể tôi hỗ trợ nhắc việc cá nhân và truy xuất tài liệu của bạn, hãy đăng nhập trước nhé!`;
+    ? `Hello **${name}**! 👋 I am the **CloudBoard Smart Assistant** 🤖.\n\nI can help you check **overdue tasks**, **deadlines due today**, or **retrieve file attachments** across your projects.\n\nHow can I help you today?`
+    : `Hello! 👋 I am the **CloudBoard Smart Assistant** 🤖.\n\nPlease sign in so I can assist you with personal reminders and file retrieval!`;
 
   chatMessagesHistory = [
     {
       sender: 'bot',
       text: welcomeText,
       suggestions: [
-        '🔴 Việc khẩn cấp & quá hạn',
-        '📅 Hôm nay cần làm gì?',
-        '📎 Truy xuất tài liệu đính kèm',
-        '📊 Báo cáo tiến độ'
+        '🔴 Urgent & Overdue',
+        '📅 Due Today',
+        '📎 Retrieve Attachments',
+        '📊 Progress Report'
       ],
       documents: []
     }
@@ -2730,9 +2730,9 @@ function renderChatMessages() {
             <span class="chat-doc-icon">📄</span>
             <div style="flex:1; min-width:0;">
               <div class="chat-doc-name">${escHtml(d.fileName)}</div>
-              <div class="chat-doc-meta">${formatBytes(d.fileSize)} • Thuộc task: ${escHtml(d.taskTitle || '')}</div>
+              <div class="chat-doc-meta">${formatBytes(d.fileSize)} • Task: ${escHtml(d.taskTitle || '')}</div>
             </div>
-            <span style="font-size:12px; color:var(--primary); font-weight:700;">Tải về ⬇</span>
+            <span style="font-size:12px; color:var(--primary); font-weight:700;">Download ⬇</span>
           </a>
         `).join('') +
         `</div>`;
@@ -2798,7 +2798,7 @@ async function sendChatMessage(text) {
 
   chatMessagesHistory.push({
     sender: 'bot',
-    text: 'Đang tra cứu dữ liệu công việc...',
+    text: 'Searching task data...',
     isLoading: true
   });
   renderChatMessages();
@@ -2826,15 +2826,15 @@ async function sendChatMessage(text) {
     } else {
       chatMessagesHistory.push({
         sender: 'bot',
-        text: 'Rất tiếc, đã có lỗi xảy ra khi kết nối máy chủ. Bạn vui lòng thử lại nhé!',
-        suggestions: ['🔴 Việc khẩn cấp & quá hạn', '📅 Hôm nay cần làm gì?']
+        text: 'Sorry, an error occurred while connecting to the server. Please try again!',
+        suggestions: ['🔴 Urgent & Overdue', '📅 Due Today']
       });
     }
   } catch (err) {
     chatMessagesHistory.pop(); // Remove typing indicator
     chatMessagesHistory.push({
       sender: 'bot',
-      text: 'Không thể kết nối đến máy chủ. Bạn vui lòng kiểm tra kết nối mạng nhé!',
+      text: 'Unable to connect to the server. Please check your network connection!',
       suggestions: []
     });
   } finally {
