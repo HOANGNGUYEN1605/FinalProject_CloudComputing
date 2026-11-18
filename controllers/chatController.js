@@ -413,9 +413,53 @@ exports.processMessage = async (req, res) => {
               `Tôi có thể giúp bạn các tính năng sau:\n` +
               `1. 🚨 **Nhắc nhở công việc:** Cảnh báo các task quá hạn, task có hạn hôm nay hoặc sắp tới hạn.\n` +
               `2. 🎯 **Lọc việc khẩn cấp:** Tìm các công việc có độ ưu tiên cao (Urgent, High) cần làm trước.\n` +
-              `3. 📎 **Truy xuất tài liệu:** Tìm kiếm và cung cấp đường dẫn tải trực tiếp các tệp đính kèm trong task.\n` +
-              `4. 📊 **Báo cáo tiến độ:** Thống kê tỷ lệ hoàn thành công việc và tóm tắt theo thời gian thực.\n\n` +
+              `3. 👥 **Dự án nhóm & Lời mời:** Xem danh sách dự án bạn tham gia và thông báo các lời mời đang chờ.\n` +
+              `4. 📎 **Truy xuất tài liệu:** Tìm kiếm và cung cấp đường dẫn tải trực tiếp các tệp đính kèm trong task.\n` +
+              `5. 📊 **Báo cáo tiến độ:** Thống kê tỷ lệ hoàn thành công việc và tóm tắt theo thời gian thực.\n\n` +
               `Bạn có thể bấm vào các nút gợi ý nhanh bên dưới hoặc gõ câu hỏi bất kỳ!`;
+    }
+
+    // Intent 7: Dự án nhóm, Lời mời & Thành viên
+    else if (
+      lowerMsg.includes('dự án') ||
+      lowerMsg.includes('nhóm') ||
+      lowerMsg.includes('lời mời') ||
+      lowerMsg.includes('thành viên')
+    ) {
+      const userProjects = await Project.find({
+        $or: [{ owner: userId }, { members: userId }]
+      }).populate('owner', 'name email').populate('members', 'name email');
+
+      const userEmail = (req.user.email || '').toLowerCase().trim();
+      const pendingInvites = await Project.find({
+        'invitations': {
+          $elemMatch: {
+            email: userEmail,
+            status: 'PENDING'
+          }
+        }
+      }).populate('owner', 'name email');
+
+      reply = `👥 **THÔNG TIN DỰ ÁN NHÓM & LỜI MỜI CỦA BẠN:**\n\n`;
+
+      if (pendingInvites.length > 0) {
+        reply += `📬 **BẠN CÓ ${pendingInvites.length} LỜI MỜI ĐANG CHỜ CHẤP NHẬN:**\n`;
+        pendingInvites.forEach(p => {
+          reply += `• Dự án **${p.name}** (Mời bởi: ${p.owner ? p.owner.name : 'Chủ dự án'} - ${p.owner ? p.owner.email : ''})\n`;
+        });
+        reply += `👉 Hãy nhấn nút **"📬 Lời mời"** trên thanh tiêu đề để Chấp nhận tham gia nhé!\n\n`;
+      }
+
+      if (userProjects.length > 0) {
+        reply += `📁 **CÁC DỰ ÁN BẠN ĐANG THAM GIA (${userProjects.length} dự án):**\n`;
+        userProjects.forEach(p => {
+          const isOwner = p.owner && p.owner._id.toString() === userId;
+          const memberCount = (p.members || []).length;
+          reply += `• **${p.name}** [${isOwner ? '👑 Bạn là Chủ dự án' : 'Thành viên'}] — Gồm ${memberCount} thành viên\n`;
+        });
+      } else {
+        reply += `Hiện tại bạn chưa tham gia dự án nhóm nào. Bạn có thể nhấn **"+ Tạo dự án mới"** ở menu bên trái và nhập Gmail của các thành viên để bắt đầu cộng tác nhóm nhé!`;
+      }
     }
 
     // Fallback mặc định: Tóm tắt thông minh ngắn gọn

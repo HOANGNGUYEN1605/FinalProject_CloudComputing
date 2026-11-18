@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer');
 const ExcelJS = require('exceljs');
 const path = require('path');
 const fs = require('fs');
+const { getRedisStatus } = require('../config/redis');
 
 const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 let taskQueue = null;
@@ -140,9 +141,12 @@ function initQueue() {
 
 // Hàm đẩy job vào hàng đợi
 async function addQueueJob(type, payload) {
-  if (isQueueActive && taskQueue) {
+  if (isQueueActive && taskQueue && getRedisStatus() === 'Connected') {
     try {
-      const job = await taskQueue.add(type, payload, { attempts: 3, backoff: 2000 });
+      const job = await Promise.race([
+        taskQueue.add(type, payload, { attempts: 3, backoff: 2000 }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Queue timeout')), 2000))
+      ]);
       return { queued: true, jobId: job.id };
     } catch (err) {
       console.warn('⚠️ Lỗi đẩy job vào Redis Queue, chuyển sang xử lý trực tiếp:', err.message);

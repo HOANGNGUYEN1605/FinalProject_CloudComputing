@@ -54,6 +54,7 @@ exports.getTasks = async (req, res) => {
     const tasks = await Task.find(filter)
       .populate('assignee', 'name email avatar')
       .populate('creator', 'name email')
+      .populate('project', 'name')
       .sort({ createdAt: -1 });
 
     await setCache(cacheKey, tasks, 30);
@@ -114,7 +115,8 @@ exports.createTask = async (req, res) => {
 
     const populatedTask = await Task.findById(newTask._id)
       .populate('assignee', 'name email avatar')
-      .populate('creator', 'name email');
+      .populate('creator', 'name email')
+      .populate('project', 'name');
 
     res.status(201).json(populatedTask);
   } catch (err) {
@@ -133,7 +135,8 @@ exports.updateTask = async (req, res) => {
       runValidators: true
     })
       .populate('assignee', 'name email avatar')
-      .populate('creator', 'name email');
+      .populate('creator', 'name email')
+      .populate('project', 'name');
 
     if (!updatedTask) {
       return res.status(404).json({ error: 'Không tìm thấy công việc' });

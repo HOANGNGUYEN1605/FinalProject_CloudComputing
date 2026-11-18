@@ -22,6 +22,29 @@ const projectSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
       }
+    ],
+    invitations: [
+      {
+        email: {
+          type: String,
+          required: true,
+          lowercase: true,
+          trim: true
+        },
+        invitedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User'
+        },
+        status: {
+          type: String,
+          enum: ['PENDING', 'ACCEPTED', 'DECLINED'],
+          default: 'PENDING'
+        },
+        invitedAt: {
+          type: Date,
+          default: Date.now
+        }
+      }
     ]
   },
   { timestamps: true }
