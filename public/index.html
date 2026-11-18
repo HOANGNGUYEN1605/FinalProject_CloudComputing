@@ -1256,7 +1256,7 @@
 
 <!-- ===== MODAL: TẠO DỰ ÁN ===== -->
 <div class="modal-backdrop" id="projectModal">
-  <div class="modal">
+  <div class="modal" style="max-width: 540px;">
     <div class="modal-header">
       <div class="modal-title-wrap"><span class="modal-icon">📁</span><span class="modal-title">Tạo dự án mới</span></div>
       <button class="modal-close" onclick="closeModal('projectModal')">✕</button>
@@ -1271,14 +1271,30 @@
           <label class="form-label">Mô tả / Mục tiêu</label>
           <textarea id="projDesc" class="form-control" placeholder="Mục tiêu của dự án, phạm vi công việc..."></textarea>
         </div>
+        
+        <!-- THÀNH VIÊN DỰ ÁN NGAY LÚC TẠO -->
         <div class="form-group">
-          <label class="form-label">Mời thành viên qua Gmail / Email</label>
-          <input type="text" id="projEmails" class="form-control" placeholder="user1@gmail.com, user2@gmail.com (phân cách bằng dấu phẩy)" />
-          <div style="font-size:11.5px; color:var(--text-muted); margin-top:5px; line-height:1.4;">
-            📩 Hệ thống sẽ gửi thư mời tự động. Người nhận có thể chọn <b>Chấp nhận</b> hoặc <b>Từ chối</b> khi đăng nhập.
+          <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>👥 Thêm thành viên vào dự án ngay lúc tạo</span>
+            <span style="font-size:11px; font-weight:normal; color:var(--text-muted);">Gợi ý tên Gmail trong Task</span>
+          </label>
+          <div style="display:flex; gap:8px; margin-bottom:8px;">
+            <input type="text" id="newProjMemberInput" class="form-control" placeholder="Nhập Gmail thành viên (ví dụ: friend@gmail.com)..." onkeydown="handleNewMemberKey(event)" />
+            <button type="button" class="btn btn-primary" onclick="addMemberToNewProjList()" style="white-space:nowrap; padding:0 14px; font-size:13px; font-weight:600;">+ Thêm</button>
+          </div>
+          <div style="font-size:11.5px; color:var(--text-muted); margin-bottom:10px; line-height:1.4;">
+            💡 <b>Quy tắc quan trọng:</b> Chỉ những thành viên được thêm ngay tại đây (hoặc vào dự án này) mới xuất hiện trong danh sách gợi ý phân công công việc (Task) của dự án.
+          </div>
+          
+          <div style="font-size:11.5px; font-weight:600; color:var(--text-secondary); margin-bottom:6px;">Danh sách thành viên dự án:</div>
+          <div id="newProjMembersList" style="display:flex; flex-wrap:wrap; gap:8px; min-height:42px; padding:10px; background:var(--bg-input, #f8fafc); border:1px solid var(--border-color, #e2e8f0); border-radius:8px;">
+            <!-- Render badges -->
           </div>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%">Tạo dự án & Gửi lời mời</button>
+
+        <button type="submit" class="btn btn-primary" id="btnSubmitCreateProj" style="width:100%; margin-top:12px; padding:10px; font-weight:600;">
+          Tạo dự án & Thêm thành viên
+        </button>
       </form>
     </div>
   </div>
@@ -1353,6 +1369,9 @@
             <select id="taskAssignee" class="form-control">
               <option value="">(Chưa phân công)</option>
             </select>
+            <div id="taskAssigneeHelper" style="font-size:11px; color:var(--text-muted); margin-top:4px; line-height:1.3;">
+              💡 Chỉ hiển thị các thành viên thuộc dự án này.
+            </div>
           </div>
         </div>
       </form>
@@ -1776,6 +1795,7 @@ function updateAssigneeSelect() {
 async function handleTaskProjectChange() {
   const projSelect = document.getElementById('taskProject');
   const sel = document.getElementById('taskAssignee');
+  const helper = document.getElementById('taskAssigneeHelper');
   if (!sel) return;
 
   const currentVal = sel.value;
@@ -1784,53 +1804,58 @@ async function handleTaskProjectChange() {
   sel.innerHTML = '<option value="">(Chưa phân công)</option>';
 
   if (!projectId) {
-    // Không gán dự án: dùng usersList chung
-    usersList.forEach(u => {
-      sel.innerHTML += `<option value="${u._id}">${escHtml(u.name)} — ✉️ ${escHtml(u.email)}</option>`;
-    });
-  } else {
-    // Dự án nhóm: hiển thị thành viên của dự án đó
-    const project = projectsList.find(p => p._id === projectId);
-    const membersMap = new Map();
-
-    if (project) {
-      if (project.owner) {
-        const o = typeof project.owner === 'object' ? project.owner : { _id: project.owner, name: 'Chủ dự án', email: '' };
-        if (o._id) membersMap.set(String(o._id), { ...o, roleTitle: '(Chủ dự án)' });
-      }
-      if (project.members && project.members.length > 0) {
-        project.members.forEach(m => {
-          if (typeof m === 'object' && m._id) {
-            membersMap.set(String(m._id), { ...m, roleTitle: '(Thành viên)' });
-          }
-        });
-      }
+    // Không gán dự án: chỉ hiển thị tài khoản cá nhân của chính mình
+    if (currentUser && (currentUser._id || currentUser.id)) {
+      const myId = currentUser._id || currentUser.id;
+      const myName = currentUser.name || 'Tôi';
+      const myEmail = currentUser.email || '';
+      sel.innerHTML += `<option value="${myId}">${escHtml(myName)} (Cá nhân) — ✉️ ${escHtml(myEmail)}</option>`;
     }
-
-    if (membersMap.size > 0) {
-      membersMap.forEach(m => {
-        sel.innerHTML += `<option value="${m._id}">${escHtml(m.name)} ${m.roleTitle || ''} — ✉️ ${escHtml(m.email)}</option>`;
+    if (helper) helper.textContent = '💡 Việc cá nhân: chỉ hiển thị tài khoản của bạn.';
+  } else {
+    // Dự án nhóm: CHỈ hiển thị thành viên của dự án đó (Chủ dự án và thành viên đã thêm)
+    try {
+      const res = await fetch(`/api/projects/${projectId}/members`, {
+        headers: { Authorization: `Bearer ${authToken}` }
       });
-    } else {
-      try {
-        const res = await fetch(`/api/projects/${projectId}/members`, {
-          headers: { Authorization: `Bearer ${authToken}` }
-        });
-        if (res.ok) {
-          const members = await res.json();
-          members.forEach(m => {
-            sel.innerHTML += `<option value="${m._id}">${escHtml(m.name)} — ✉️ ${escHtml(m.email)}</option>`;
-          });
+      let members = [];
+      if (res.ok) {
+        members = await res.json();
+      } else {
+        // Fallback từ cache projectsList
+        const project = projectsList.find(p => p._id === projectId);
+        if (project) {
+          if (project.owner) {
+            const o = typeof project.owner === 'object' ? project.owner : { _id: project.owner, name: 'Chủ dự án', email: '' };
+            if (o._id) members.push({ ...o, isOwner: true });
+          }
+          if (project.members && project.members.length > 0) {
+            project.members.forEach(m => {
+              if (typeof m === 'object' && m._id && !members.some(x => String(x._id) === String(m._id))) {
+                members.push({ ...m, isOwner: false });
+              }
+            });
+          }
         }
-      } catch (e) {
-        usersList.forEach(u => {
-          sel.innerHTML += `<option value="${u._id}">${escHtml(u.name)} — ✉️ ${escHtml(u.email)}</option>`;
+      }
+
+      if (members.length > 0) {
+        members.forEach(m => {
+          const roleTitle = m.isOwner ? '👑 (Chủ dự án)' : '👤 (Thành viên)';
+          const emailStr = m.email ? ` — ✉️ ${escHtml(m.email)}` : '';
+          sel.innerHTML += `<option value="${m._id}">${escHtml(m.name || 'Thành viên')} ${roleTitle}${emailStr}</option>`;
         });
       }
+
+      const projObj = projectsList.find(p => p._id === projectId);
+      const projName = projObj ? projObj.name : 'dự án này';
+      if (helper) helper.textContent = `💡 Chỉ hiển thị các thành viên đã được thêm vào dự án "${projName}".`;
+    } catch (e) {
+      console.error('Lỗi khi tải thành viên dự án:', e);
     }
   }
 
-  if (currentVal) {
+  if (currentVal && Array.from(sel.options).some(opt => opt.value === currentVal)) {
     sel.value = currentVal;
   }
 }
@@ -1893,16 +1918,114 @@ function setProjectFilter(projectId, name) {
   loadTasks();
 }
 
+let newProjectMembers = [];
+
+function initNewProjectModal() {
+  newProjectMembers = [];
+  renderNewProjectMembers();
+  const input = document.getElementById('newProjMemberInput');
+  if (input) input.value = '';
+}
+
+function renderNewProjectMembers() {
+  const container = document.getElementById('newProjMembersList');
+  if (!container) return;
+
+  const myName = (currentUser && currentUser.name) ? currentUser.name : 'Bạn';
+  const myEmail = (currentUser && currentUser.email) ? currentUser.email : '';
+
+  let html = `
+    <span style="display:inline-flex; align-items:center; gap:6px; background:#e0e7ff; color:#3730a3; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:600; border:1px solid #c7d2fe;">
+      👑 ${escHtml(myName)} (Chủ dự án) <span style="font-size:11px; opacity:0.85;">— ✉️ ${escHtml(myEmail)}</span>
+    </span>
+  `;
+
+  if (newProjectMembers.length === 0) {
+    html += `
+      <span style="font-size:12px; color:var(--text-muted); align-self:center; margin-left:4px;">
+        (Chưa thêm thành viên nào. Hãy nhập Gmail bên trên và nhấn "+ Thêm")
+      </span>
+    `;
+  } else {
+    newProjectMembers.forEach((email, idx) => {
+      html += `
+        <span style="display:inline-flex; align-items:center; gap:6px; background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:500;">
+          👤 ✉️ <b>${escHtml(email)}</b>
+          <button type="button" onclick="removeMemberFromNewProj(${idx})" title="Xóa thành viên" style="background:none; border:none; cursor:pointer; color:#ef4444; font-weight:bold; font-size:14px; line-height:1; padding:0 2px; margin-left:2px;">✕</button>
+        </span>
+      `;
+    });
+  }
+
+  container.innerHTML = html;
+}
+
+function handleNewMemberKey(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    addMemberToNewProjList();
+  }
+}
+
+function addMemberToNewProjList() {
+  const input = document.getElementById('newProjMemberInput');
+  if (!input) return;
+  const raw = input.value.trim().toLowerCase();
+  if (!raw) return;
+
+  const emails = raw.split(/[,;\s]+/).map(s => s.trim().toLowerCase()).filter(s => s.includes('@'));
+  if (emails.length === 0) {
+    toast('Vui lòng nhập định dạng Gmail hợp lệ (có chứa @)', 'error');
+    return;
+  }
+
+  const myEmail = (currentUser && currentUser.email ? currentUser.email : '').toLowerCase();
+
+  let addedCount = 0;
+  emails.forEach(email => {
+    if (email === myEmail) {
+      toast('Bạn là Chủ dự án và đã luôn có trong danh sách!', 'info');
+      return;
+    }
+    if (newProjectMembers.includes(email)) {
+      toast(`Gmail "${email}" đã có trong danh sách`, 'warning');
+      return;
+    }
+    newProjectMembers.push(email);
+    addedCount++;
+  });
+
+  if (addedCount > 0) {
+    input.value = '';
+    renderNewProjectMembers();
+    toast(`Đã thêm ${addedCount} thành viên vào danh sách dự án!`, 'success');
+  }
+}
+
+function removeMemberFromNewProj(index) {
+  newProjectMembers.splice(index, 1);
+  renderNewProjectMembers();
+}
+
 async function openProjectModal() {
   if (!authToken) { toast('Vui lòng đăng nhập trước', 'error'); openAuthModal(); return; }
+  document.getElementById('projectForm').reset();
+  initNewProjectModal();
   openModal('projectModal');
 }
 
 async function handleCreateProject(e) {
   e.preventDefault();
-  const name = document.getElementById('projName').value;
-  const description = document.getElementById('projDesc').value;
-  const memberEmails = document.getElementById('projEmails') ? document.getElementById('projEmails').value : '';
+  const name = document.getElementById('projName').value.trim();
+  const description = document.getElementById('projDesc').value.trim();
+  const memberEmails = newProjectMembers;
+
+  const btn = document.getElementById('btnSubmitCreateProj');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Đang tạo dự án...';
+  }
+
   try {
     const res = await fetch('/api/projects', {
       method: 'POST',
@@ -1913,10 +2036,18 @@ async function handleCreateProject(e) {
     if (!res.ok) throw new Error(data.error || 'Tạo dự án thất bại');
     closeModal('projectModal');
     document.getElementById('projectForm').reset();
+    newProjectMembers = [];
     toast(data.message || `Đã tạo dự án "${name}" thành công!`, 'success');
     await fetchProjects();
     fetchPendingInvitations();
-  } catch (err) { toast(err.message, 'error'); }
+  } catch (err) {
+    toast(err.message, 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Tạo dự án & Thêm thành viên';
+    }
+  }
 }
 
 // ---------------------------------------------
