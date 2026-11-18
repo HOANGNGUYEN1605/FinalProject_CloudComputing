@@ -30,6 +30,7 @@ router.get('/', (req, res) => {
       database: getDbStatus(),
       caching: getRedisStatus(),
       backgroundQueue: getQueueStatus(),
+      aiAssistant: process.env.GEMINI_API_KEY ? 'Active (Gemini Cloud LLM)' : 'Active (Built-in Smart RAG Engine)',
       storage: 'Local File Storage / Public Assets'
     }
   });

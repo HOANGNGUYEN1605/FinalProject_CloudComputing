@@ -13,6 +13,7 @@ const authRoutes = require('./routes/authRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const healthRoutes = require('./routes/healthRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/health', healthRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Điều hướng trang chính
 app.get('/', (req, res) => {
